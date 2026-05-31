@@ -1,0 +1,1782 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#c8a200" />
+  <meta name="description" content="SupEna – Gestione estrazioni SuperEnalotto" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SupEna" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/favicon.ico" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <title>SupEna</title>
+
+  <style>
+    /* ═══════════════════════════════════════
+       VARIABILI E RESET
+    ═══════════════════════════════════════ */
+    :root {
+      --oro:        #c8a200;
+      --oro-chiaro: #e8bc00;
+      --oro-scuro:  #8b6f00;
+      --blu-notte:  #0a1628;
+      --blu-medio:  #102040;
+      --blu-card:   #142038;
+      --blu-bordo:  #1e3058;
+      --rosso-ss:   #e03030;
+      --rosso-scuro:#a01010;
+      --verde:      #2ecc71;
+      --testo:      #e8e0cc;
+      --testo-dim:  #8a8070;
+      --raggio:     12px;
+      --raggio-sm:  8px;
+      --ombra:      0 4px 24px rgba(0,0,0,0.5);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      background: var(--blu-notte);
+      color: var(--testo);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ═══════════════════════════════════════
+       HEADER
+    ═══════════════════════════════════════ */
+    header {
+      background: linear-gradient(135deg, #0a1628 0%, #102040 50%, #0a1628 100%);
+      border-bottom: 2px solid var(--oro-scuro);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 20px rgba(200,162,0,0.3);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #f0d040, #c8a200 55%, #8b6f00);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 15px;
+      color: #1a0a00;
+      border: 2px solid var(--oro-scuro);
+      box-shadow: 0 2px 12px rgba(200,162,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+      flex-shrink: 0;
+      letter-spacing: -0.5px;
+    }
+
+    .app-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #f0d040, #c8a200, #e8bc00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-status {
+      margin-left: auto;
+      font-size: 0.7rem;
+      color: var(--testo-dim);
+      text-align: right;
+      line-height: 1.4;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--testo-dim);
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+    .status-dot.ok { background: var(--verde); box-shadow: 0 0 6px var(--verde); }
+    .status-dot.loading { background: var(--oro); animation: pulse 1s infinite; }
+
+    @keyframes pulse {
+      0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+    }
+
+    /* ═══════════════════════════════════════
+       NAV TABS
+    ═══════════════════════════════════════ */
+    nav.tabs {
+      display: flex;
+      background: var(--blu-medio);
+      border-bottom: 1px solid var(--blu-bordo);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    nav.tabs::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 70px;
+      padding: 10px 8px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: var(--testo-dim);
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--testo); background: rgba(255,255,255,0.04); }
+    .tab-btn.active {
+      color: var(--oro);
+      border-bottom-color: var(--oro);
+      background: rgba(200,162,0,0.08);
+    }
+
+    /* ═══════════════════════════════════════
+       SEZIONI PRINCIPALI
+    ═══════════════════════════════════════ */
+    main { padding: 16px; max-width: 800px; margin: 0 auto; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* ═══════════════════════════════════════
+       CARDS
+    ═══════════════════════════════════════ */
+    .card {
+      background: var(--blu-card);
+      border: 1px solid var(--blu-bordo);
+      border-radius: var(--raggio);
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: var(--ombra);
+    }
+
+    .card-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--oro);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ═══════════════════════════════════════
+       FILTRI ARCHIVIO
+    ═══════════════════════════════════════ */
+    .filtri-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .filtro-group { display: flex; flex-direction: column; gap: 5px; }
+
+    label.lbl {
+      font-size: 0.72rem;
+      color: var(--testo-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    select, input[type="number"] {
+      background: var(--blu-notte);
+      border: 1px solid var(--blu-bordo);
+      border-radius: var(--raggio-sm);
+      color: var(--testo);
+      padding: 8px 10px;
+      font-size: 0.9rem;
+      width: 100%;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    select:focus, input[type="number"]:focus {
+      outline: none;
+      border-color: var(--oro);
+    }
+
+    .btn-carica {
+      width: 100%;
+      margin-top: 12px;
+      padding: 11px;
+      background: linear-gradient(135deg, var(--oro-scuro), var(--oro));
+      color: #1a0a00;
+      border: none;
+      border-radius: var(--raggio-sm);
+      font-weight: 800;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+      box-shadow: 0 2px 10px rgba(200,162,0,0.3);
+    }
+    .btn-carica:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-carica:active { transform: translateY(0); }
+    .btn-carica:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ═══════════════════════════════════════
+       STATS ARCHIVIO
+    ═══════════════════════════════════════ */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .stat-box {
+      background: var(--blu-notte);
+      border: 1px solid var(--blu-bordo);
+      border-radius: var(--raggio-sm);
+      padding: 10px;
+      text-align: center;
+    }
+    .stat-num {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--oro);
+      line-height: 1;
+    }
+    .stat-lbl {
+      font-size: 0.65rem;
+      color: var(--testo-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 3px;
+    }
+
+    /* ═══════════════════════════════════════
+       PALLINI NUMERI
+    ═══════════════════════════════════════ */
+    .pallini {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      align-items: center;
+    }
+
+    .pallino {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+      position: relative;
+      transition: transform 0.15s;
+    }
+    .pallino:hover { transform: scale(1.1); }
+
+    /* Pallino standard blu (numeri estratti) */
+    .pallino.blu {
+      background: radial-gradient(circle at 35% 30%, #2a5cb8, #0a2878);
+      color: #fff;
+      border: 2px solid #1a3a8a;
+      box-shadow: 0 2px 8px rgba(10,40,120,0.7), inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+
+    /* Jolly - verde */
+    .pallino.jolly {
+      background: radial-gradient(circle at 35% 30%, #2ecc71, #1a8a48);
+      color: #fff;
+      border: 2px solid #178a40;
+      box-shadow: 0 2px 8px rgba(30,140,60,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+    .pallino.jolly::after {
+      content: 'J';
+      position: absolute;
+      bottom: -1px;
+      right: -1px;
+      width: 13px;
+      height: 13px;
+      background: #1a8a48;
+      border-radius: 50%;
+      font-size: 0.5rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #fff;
+      line-height: 13px;
+      text-align: center;
+    }
+
+    /* SuperStar - rosso/oro */
+    .pallino.superstar {
+      background: radial-gradient(circle at 35% 30%, #e8bc00, #c8a200, #8b6f00);
+      color: #1a0a00;
+      border: 2px solid #8b6f00;
+      box-shadow: 0 2px 8px rgba(200,162,0,0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+    .pallino.superstar::after {
+      content: '★';
+      position: absolute;
+      bottom: -3px;
+      right: -3px;
+      width: 15px;
+      height: 15px;
+      background: var(--rosso-ss);
+      border-radius: 50%;
+      font-size: 0.55rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #fff;
+      line-height: 15px;
+      text-align: center;
+      color: #fff;
+    }
+
+    /* Label jolly/ss */
+    .pallino-label {
+      font-size: 0.6rem;
+      color: var(--testo-dim);
+      font-weight: 700;
+      text-transform: uppercase;
+      margin: 0 2px;
+    }
+
+    /* ═══════════════════════════════════════
+       ULTIMA ESTRAZIONE
+    ═══════════════════════════════════════ */
+    .estrazione-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .estrazione-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 0.78rem;
+      color: var(--testo-dim);
+      flex-wrap: wrap;
+    }
+    .estrazione-meta span { font-weight: 700; color: var(--testo); }
+
+    /* ═══════════════════════════════════════
+       PULSANTI GENERAZIONE
+    ═══════════════════════════════════════ */
+    .btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn-gen {
+      padding: 12px 10px;
+      border: 1px solid var(--blu-bordo);
+      border-radius: var(--raggio-sm);
+      background: var(--blu-notte);
+      color: var(--testo);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      line-height: 1.3;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .btn-gen:hover:not(:disabled) {
+      background: var(--blu-medio);
+      border-color: var(--oro-scuro);
+      color: var(--oro);
+      transform: translateY(-1px);
+    }
+    .btn-gen:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .btn-gen.primario {
+      background: linear-gradient(135deg, #0a2878, #1a3a8a);
+      border-color: #2a5cb8;
+      grid-column: 1 / -1;
+      padding: 14px;
+      font-size: 0.9rem;
+    }
+    .btn-gen.primario:hover:not(:disabled) {
+      background: linear-gradient(135deg, #1a3a8a, #2a5cb8);
+      color: #fff;
+    }
+
+    .btn-gen.frequenti { border-color: #2ecc71; }
+    .btn-gen.frequenti:hover:not(:disabled) { color: #2ecc71; border-color: #2ecc71; }
+
+    .btn-gen.ritardatari { border-color: #e67e22; }
+    .btn-gen.ritardatari:hover:not(:disabled) { color: #e67e22; border-color: #e67e22; }
+
+    .btn-gen.freddi { border-color: #3498db; }
+    .btn-gen.freddi:hover:not(:disabled) { color: #3498db; border-color: #3498db; }
+
+    .btn-gen.ridotta {
+      background: linear-gradient(135deg, #5a0a0a, #8b1a1a);
+      border-color: var(--rosso-ss);
+      color: #ffaaaa;
+      grid-column: 1 / -1;
+      padding: 14px;
+      font-size: 0.9rem;
+    }
+    .btn-gen.ridotta:hover:not(:disabled) {
+      background: linear-gradient(135deg, #8b1a1a, #b02020);
+      color: #fff;
+    }
+
+    /* Toggle SuperStar */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-top: 1px solid var(--blu-bordo);
+      margin-top: 10px;
+    }
+
+    .toggle-label { font-size: 0.8rem; color: var(--testo-dim); flex: 1; }
+
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--blu-bordo);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      top: 3px;
+      background: var(--testo-dim);
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+    .toggle input:checked + .toggle-slider { background: var(--rosso-ss); }
+    .toggle input:checked + .toggle-slider::before {
+      transform: translateX(20px);
+      background: #fff;
+    }
+
+    /* ═══════════════════════════════════════
+       RISULTATI SESTINE
+    ═══════════════════════════════════════ */
+    #risultati-container {
+      margin-top: 14px;
+    }
+
+    .sestina-card {
+      background: var(--blu-card);
+      border: 1px solid var(--blu-bordo);
+      border-radius: var(--raggio);
+      padding: 14px;
+      margin-bottom: 10px;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .sestina-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 0.72rem;
+      color: var(--testo-dim);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-tipo {
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.65rem;
+      font-weight: 800;
+    }
+    .badge-tipo.casuale   { background: rgba(26,58,138,0.5); color: #7ab0ff; border: 1px solid #2a5cb8; }
+    .badge-tipo.frequenti { background: rgba(46,204,113,0.15); color: #2ecc71; border: 1px solid #2ecc71; }
+    .badge-tipo.ritardatari { background: rgba(230,126,34,0.15); color: #e67e22; border: 1px solid #e67e22; }
+    .badge-tipo.freddi    { background: rgba(52,152,219,0.15); color: #3498db; border: 1px solid #3498db; }
+    .badge-tipo.ridotta   { background: rgba(224,48,48,0.15); color: #ff8080; border: 1px solid var(--rosso-ss); }
+
+    .sestina-check {
+      font-size: 0.65rem;
+      color: var(--verde);
+    }
+
+    /* ═══════════════════════════════════════
+       SEZIONE STATISTICHE
+    ═══════════════════════════════════════ */
+    .stat-filter-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn-stat-filter {
+      padding: 6px 14px;
+      border: 1px solid var(--blu-bordo);
+      border-radius: 20px;
+      background: var(--blu-notte);
+      color: var(--testo-dim);
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .btn-stat-filter:hover { border-color: var(--oro-scuro); color: var(--testo); }
+    .btn-stat-filter.active { background: var(--oro); color: #1a0a00; border-color: var(--oro); }
+
+    .num-concorsi-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .num-concorsi-row label { font-size: 0.78rem; color: var(--testo-dim); }
+    .num-concorsi-row input { width: 90px; }
+
+    /* Griglia numeri statistiche */
+    .griglia-stats {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      gap: 5px;
+    }
+
+    @media (max-width: 400px) {
+      .griglia-stats { grid-template-columns: repeat(6, 1fr); }
+    }
+
+    .num-stat-cell {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: default;
+      border: 2px solid transparent;
+      transition: transform 0.15s;
+      position: relative;
+    }
+    .num-stat-cell:hover { transform: scale(1.15); z-index: 2; }
+    .num-stat-cell .n { line-height: 1; }
+    .num-stat-cell .v { font-size: 0.5rem; font-weight: 600; opacity: 0.8; }
+
+    /* Colori heat-map frequenza */
+    .freq-5 { background: radial-gradient(circle at 35% 35%, #f0d040, #c8a200, #8b6f00); color: #1a0a00; border-color: #8b6f00; }
+    .freq-4 { background: radial-gradient(circle at 35% 35%, #e8b020, #a87800); color: #fff; border-color: #a87800; }
+    .freq-3 { background: radial-gradient(circle at 35% 35%, #4a6a9a, #1a3a7a); color: #fff; border-color: #2a5a9a; }
+    .freq-2 { background: radial-gradient(circle at 35% 35%, #2a4a7a, #0a2060); color: #bbb; border-color: #1a3a6a; }
+    .freq-1 { background: radial-gradient(circle at 35% 35%, #1a2a4a, #0a1530); color: #888; border-color: #1a2a4a; }
+
+    /* Ritardi */
+    .rit-5 { background: radial-gradient(circle at 35% 35%, #e03030, #901010); color: #fff; border-color: #c02020; }
+    .rit-4 { background: radial-gradient(circle at 35% 35%, #e06020, #a03810); color: #fff; border-color: #c04810; }
+    .rit-3 { background: radial-gradient(circle at 35% 35%, #e09020, #a06010); color: #fff; border-color: #c07810; }
+    .rit-2 { background: radial-gradient(circle at 35% 35%, #4a4a8a, #2a2a6a); color: #fff; border-color: #3a3a7a; }
+    .rit-1 { background: radial-gradient(circle at 35% 35%, #1a2a4a, #0a1530); color: #888; border-color: #1a2a4a; }
+
+    /* Legenda */
+    .legenda {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .leg-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.65rem;
+      color: var(--testo-dim);
+    }
+    .leg-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    /* ═══════════════════════════════════════
+       SEZIONE ARCHIVIO STORICO
+    ═══════════════════════════════════════ */
+    .archivio-filtri {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .archivio-filtri select { width: auto; min-width: 100px; }
+
+    .archivio-filtri input[type="text"] {
+      background: var(--blu-notte);
+      border: 1px solid var(--blu-bordo);
+      border-radius: var(--raggio-sm);
+      color: var(--testo);
+      padding: 8px 10px;
+      font-size: 0.85rem;
+      flex: 1;
+      min-width: 120px;
+    }
+    .archivio-filtri input[type="text"]:focus { outline: none; border-color: var(--oro); }
+
+    .btn-sm {
+      padding: 8px 14px;
+      background: var(--blu-medio);
+      border: 1px solid var(--blu-bordo);
+      border-radius: var(--raggio-sm);
+      color: var(--testo);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-sm:hover { border-color: var(--oro-scuro); color: var(--oro); }
+
+    /* Tabella estrazioni */
+    .tabella-wrapper {
+      overflow-x: auto;
+      border-radius: var(--raggio-sm);
+      border: 1px solid var(--blu-bordo);
+    }
+
+    table.estrazioni-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+
+    .estrazioni-table th {
+      background: var(--blu-medio);
+      color: var(--oro);
+      padding: 9px 10px;
+      text-align: left;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--blu-bordo);
+      white-space: nowrap;
+    }
+
+    .estrazioni-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--blu-bordo);
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .estrazioni-table tr:last-child td { border-bottom: none; }
+    .estrazioni-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+    .pallini-mini { display: flex; gap: 4px; }
+    .pallino-mini {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.65rem;
+    }
+    .pallino-mini.blu {
+      background: radial-gradient(circle at 35% 30%, #2a5cb8, #0a2878);
+      color: #fff;
+      border: 1.5px solid #1a3a8a;
+    }
+    .pallino-mini.jolly {
+      background: radial-gradient(circle at 35% 30%, #2ecc71, #1a8a48);
+      color: #fff;
+      border: 1.5px solid #178a40;
+    }
+    .pallino-mini.superstar {
+      background: radial-gradient(circle at 35% 30%, #e8bc00, #c8a200);
+      color: #1a0a00;
+      border: 1.5px solid #8b6f00;
+    }
+
+    .paginazione {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-pag {
+      padding: 6px 12px;
+      background: var(--blu-notte);
+      border: 1px solid var(--blu-bordo);
+      border-radius: var(--raggio-sm);
+      color: var(--testo-dim);
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-pag:hover:not(:disabled) { border-color: var(--oro); color: var(--oro); }
+    .btn-pag.active { background: var(--oro); color: #1a0a00; border-color: var(--oro); font-weight: 800; }
+    .btn-pag:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* ═══════════════════════════════════════
+       TOAST E LOADING
+    ═══════════════════════════════════════ */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--blu-medio);
+      border: 1px solid var(--blu-bordo);
+      border-radius: var(--raggio-sm);
+      padding: 10px 20px;
+      font-size: 0.82rem;
+      color: var(--testo);
+      z-index: 999;
+      transition: transform 0.3s;
+      box-shadow: var(--ombra);
+      white-space: nowrap;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.ok { border-color: var(--verde); color: var(--verde); }
+    #toast.err { border-color: var(--rosso-ss); color: #ff8080; }
+
+    #loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10,22,40,0.85);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+    #loading-overlay.show { display: flex; }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid var(--blu-bordo);
+      border-top-color: var(--oro);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-txt { font-size: 0.85rem; color: var(--testo-dim); }
+
+    /* ═══════════════════════════════════════
+       EMPTY STATE
+    ═══════════════════════════════════════ */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--testo-dim);
+    }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .empty-state p { font-size: 0.85rem; line-height: 1.6; }
+
+    /* ═══════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════ */
+    @media (max-width: 480px) {
+      .filtri-grid { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: repeat(3, 1fr); }
+      .btn-grid { grid-template-columns: 1fr; }
+      .btn-gen.primario, .btn-gen.ridotta { grid-column: auto; }
+      .griglia-stats { grid-template-columns: repeat(6, 1fr); }
+    }
+
+    /* ═══════════════════════════════════════
+       BARRA RITARDO
+    ═══════════════════════════════════════ */
+    .ritardo-bar {
+      height: 4px;
+      background: var(--blu-bordo);
+      border-radius: 2px;
+      margin-top: 3px;
+      overflow: hidden;
+    }
+    .ritardo-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #e67e22, #e03030);
+      transition: width 0.3s;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="logo">75</div>
+    <div class="app-title">SupEna</div>
+    <div class="header-status" id="header-status">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-text">Nessun archivio</span>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="home">🏠 Home</button>
+  <button class="tab-btn" data-tab="genera">🎱 Genera</button>
+  <button class="tab-btn" data-tab="stats">📊 Statistiche</button>
+  <button class="tab-btn" data-tab="archivio">📋 Archivio</button>
+</nav>
+
+<!-- MAIN -->
+<main>
+
+  <!-- ═══ HOME ═══ -->
+  <section class="section active" id="tab-home">
+
+    <!-- Filtri archivio -->
+    <div class="card">
+      <div class="card-title">⚙️ Configurazione Archivio</div>
+
+      <div class="filtri-grid">
+        <div class="filtro-group">
+          <label class="lbl">Modalità</label>
+          <select id="sel-modalita">
+            <option value="tutti">Tutti gli anni</option>
+            <option value="intervallo">Intervallo anni</option>
+            <option value="ultimi-n">Ultimi N concorsi</option>
+          </select>
+        </div>
+        <div class="filtro-group" id="grp-anno-da" style="display:none">
+          <label class="lbl">Anno da</label>
+          <select id="sel-anno-da"></select>
+        </div>
+        <div class="filtro-group" id="grp-anno-a" style="display:none">
+          <label class="lbl">Anno a</label>
+          <select id="sel-anno-a"></select>
+        </div>
+        <div class="filtro-group" id="grp-num-concorsi" style="display:none">
+          <label class="lbl">N° concorsi</label>
+          <input type="number" id="inp-num-concorsi" value="200" min="10" max="9999" />
+        </div>
+      </div>
+
+      <button class="btn-carica" id="btn-carica">⬇️ Carica Archivio</button>
+    </div>
+
+    <!-- Stato archivio caricato -->
+    <div id="box-archivio-caricato" style="display:none">
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-num" id="stat-concorsi">—</div>
+          <div class="stat-lbl">Concorsi</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="stat-anni">—</div>
+          <div class="stat-lbl">Anni</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="stat-dal">—</div>
+          <div class="stat-lbl">Dal</div>
+        </div>
+      </div>
+
+      <!-- Ultima estrazione -->
+      <div class="card">
+        <div class="card-title">🎰 Ultima Estrazione</div>
+        <div id="ultima-estrazione">
+          <div class="empty-state"><p>Carica l'archivio</p></div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═══ GENERA ═══ -->
+  <section class="section" id="tab-genera">
+
+    <div class="card" id="card-genera">
+      <div class="card-title">🎱 Genera Sestine</div>
+
+      <div id="no-archivio-genera" class="empty-state" style="display:none">
+        <div class="icon">⚠️</div>
+        <p>Carica prima l'archivio dalla sezione Home</p>
+      </div>
+
+      <div id="genera-controls">
+        <div class="btn-grid">
+          <button class="btn-gen primario" id="btn-casuale">🎲 Estrazione Classica<br><small style="font-weight:400;font-size:0.72rem">2 sestine casuali</small></button>
+          <button class="btn-gen frequenti" id="btn-frequenti">🔥 Frequenti<br><small style="font-weight:400;font-size:0.72rem">Numeri caldi</small></button>
+          <button class="btn-gen freddi" id="btn-freddi">❄️ Freddi<br><small style="font-weight:400;font-size:0.72rem">Poco estratti</small></button>
+          <button class="btn-gen ritardatari" id="btn-ritardatari">⏳ Ritardatari<br><small style="font-weight:400;font-size:0.72rem">Assenti da più</small></button>
+          <button class="btn-gen ridotta" id="btn-ridotta">🎯 Puntata Ridotta<br><small style="font-weight:400;font-size:0.72rem">Ottimizzata per 4+</small></button>
+        </div>
+
+        <div class="toggle-row">
+          <span class="toggle-label">Includi numero <strong>SuperStar</strong></span>
+          <label class="toggle">
+            <input type="checkbox" id="chk-superstar" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row" style="border-top:none;padding-top:0">
+          <span class="toggle-label">Genera <strong>2 sestine</strong> (invece di 1)</span>
+          <label class="toggle">
+            <input type="checkbox" id="chk-due-sestine" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div id="risultati-container"></div>
+
+  </section>
+
+  <!-- ═══ STATISTICHE ═══ -->
+  <section class="section" id="tab-stats">
+
+    <div id="no-archivio-stats" class="empty-state" style="display:none">
+      <div class="icon">📊</div>
+      <p>Carica prima l'archivio dalla sezione Home</p>
+    </div>
+
+    <div id="stats-controls">
+      <div class="card">
+        <div class="card-title">🔍 Vista</div>
+        <div class="stat-filter-row">
+          <button class="btn-stat-filter active" data-vista="frequenza">Frequenza</button>
+          <button class="btn-stat-filter" data-vista="ritardo">Ritardo</button>
+          <button class="btn-stat-filter" data-vista="freddi">Freddi</button>
+        </div>
+        <div class="num-concorsi-row">
+          <label class="lbl">Ultimi N concorsi (0 = tutti):</label>
+          <input type="number" id="inp-stats-n" value="0" min="0" max="9999" style="width:90px" />
+          <button class="btn-sm" id="btn-stats-aggiorna">Aggiorna</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" id="stats-titolo">📈 Frequenza Numeri (1–90)</div>
+        <div class="griglia-stats" id="griglia-stats"></div>
+        <div class="legenda" id="legenda-stats"></div>
+      </div>
+
+      <!-- Top 10 -->
+      <div class="card">
+        <div class="card-title" id="top10-titolo">🏆 Top 10</div>
+        <div class="pallini" id="top10-pallini"></div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═══ ARCHIVIO ═══ -->
+  <section class="section" id="tab-archivio">
+
+    <div id="no-archivio-arch" class="empty-state" style="display:none">
+      <div class="icon">📋</div>
+      <p>Carica prima l'archivio dalla sezione Home</p>
+    </div>
+
+    <div id="archivio-controls">
+      <div class="card">
+        <div class="card-title">🔍 Cerca &amp; Filtra</div>
+        <div class="archivio-filtri">
+          <select id="arch-sel-anno" style="min-width:100px">
+            <option value="">Tutti gli anni</option>
+          </select>
+          <input type="text" id="arch-cerca-num" placeholder="Cerca numero (es: 7)" maxlength="2" />
+          <button class="btn-sm" id="btn-arch-reset">Reset</button>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0; overflow:hidden">
+        <div class="tabella-wrapper">
+          <table class="estrazioni-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Data</th>
+                <th>Numeri estratti</th>
+                <th>J</th>
+                <th>SS</th>
+              </tr>
+            </thead>
+            <tbody id="arch-tbody"></tbody>
+          </table>
+        </div>
+        <div class="paginazione" id="paginazione"></div>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- Loading overlay -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-txt" id="loading-txt">Caricamento...</div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  COSTANTI E STATO GLOBALE
+// ═══════════════════════════════════════════════════════
+
+// Anni disponibili nell'archivio — aggiungere qui quando si caricano 2009-2021
+const ANNI_DISPONIBILI = [2022, 2023, 2024, 2025, 2026];
+const ANNO_MIN = Math.min(...ANNI_DISPONIBILI);
+const ANNO_MAX = Math.max(...ANNI_DISPONIBILI);
+
+const STATE = {
+  estrazioni: [],      // Array di tutti i record caricati
+  hashSet: null,       // Set di chiavi "n1-n2-n3-n4-n5-n6" per verifica unicità
+  anniCaricati: [],
+  vistaStat: 'frequenza',
+  archPagina: 1,
+  archPerPagina: 20,
+  archFiltroAnno: '',
+  archFiltroNum: '',
+};
+
+// ═══════════════════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════════════════
+
+function mostraToast(msg, tipo = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + tipo;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = ''; }, 3000);
+}
+
+function mostraLoading(txt = 'Caricamento...') {
+  document.getElementById('loading-txt').textContent = txt;
+  document.getElementById('loading-overlay').classList.add('show');
+}
+
+function nascondiLoading() {
+  document.getElementById('loading-overlay').classList.remove('show');
+}
+
+function formattaData(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function estraiNumeri(rec) {
+  return [rec.Numero1, rec.Numero2, rec.Numero3, rec.Numero4, rec.Numero5, rec.Numero6];
+}
+
+// ═══════════════════════════════════════════════════════
+//  COMPONENTI UI — PALLINI
+// ═══════════════════════════════════════════════════════
+
+function pallino(n, tipo = 'blu') {
+  return `<div class="pallino ${tipo}">${n}</div>`;
+}
+
+function pallinoMini(n, tipo = 'blu') {
+  return `<div class="pallino-mini ${tipo}">${n}</div>`;
+}
+
+function renderPallini(nums, jolly, superstar) {
+  let html = '<div class="pallini">';
+  nums.forEach(n => html += pallino(n, 'blu'));
+  html += `<span class="pallino-label">J</span>`;
+  html += pallino(jolly, 'jolly');
+  if (superstar !== undefined) {
+    html += `<span class="pallino-label">SS</span>`;
+    html += pallino(superstar, 'superstar');
+  }
+  html += '</div>';
+  return html;
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIZIALIZZAZIONE SELETTORI ANNI
+// ═══════════════════════════════════════════════════════
+
+function initSelettoriAnni() {
+  const da = document.getElementById('sel-anno-da');
+  const a  = document.getElementById('sel-anno-a');
+  const archAnno = document.getElementById('arch-sel-anno');
+
+  da.innerHTML = '';
+  a.innerHTML  = '';
+  // Mantieni "Tutti gli anni" per archivio
+  archAnno.innerHTML = '<option value="">Tutti gli anni</option>';
+
+  ANNI_DISPONIBILI.forEach(anno => {
+    da.innerHTML += `<option value="${anno}">${anno}</option>`;
+    a.innerHTML  += `<option value="${anno}" ${anno === ANNO_MAX ? 'selected' : ''}>${anno}</option>`;
+    archAnno.innerHTML += `<option value="${anno}">${anno}</option>`;
+  });
+  // Default anno-da: minimo
+  da.value = ANNO_MIN;
+}
+
+// ═══════════════════════════════════════════════════════
+//  CARICAMENTO ARCHIVIO
+// ═══════════════════════════════════════════════════════
+
+async function caricaArchivio() {
+  const modalita = document.getElementById('sel-modalita').value;
+  const numConcorsi = parseInt(document.getElementById('inp-num-concorsi').value) || 200;
+
+  let anniDaCaricare = [...ANNI_DISPONIBILI];
+
+  if (modalita === 'intervallo') {
+    const da = parseInt(document.getElementById('sel-anno-da').value);
+    const a  = parseInt(document.getElementById('sel-anno-a').value);
+    if (da > a) { mostraToast('Anno "da" maggiore di "a"', 'err'); return; }
+    anniDaCaricare = ANNI_DISPONIBILI.filter(y => y >= da && y <= a);
+  }
+
+  mostraLoading('Caricamento archivio...');
+
+  const tutteEstrazioni = [];
+
+  for (const anno of anniDaCaricare) {
+    try {
+      mostraLoading(`Caricamento ${anno}...`);
+      const base = window.location.pathname.includes('/sup-ena') ? '/sup-ena' : '.';
+      const resp = await fetch(`${base}/estrazioni/${anno}.json`);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const dati = await resp.json();
+      tutteEstrazioni.push(...dati);
+    } catch (e) {
+      console.warn(`Impossibile caricare ${anno}.json:`, e);
+      mostraToast(`File ${anno}.json non trovato`, 'err');
+    }
+  }
+
+  if (tutteEstrazioni.length === 0) {
+    nascondiLoading();
+    mostraToast('Nessun dato caricato', 'err');
+    return;
+  }
+
+  // Ordina per data crescente
+  tutteEstrazioni.sort((a, b) => new Date(a.Data) - new Date(b.Data));
+
+  // Applica filtro ultimi N concorsi
+  let finale = tutteEstrazioni;
+  if (modalita === 'ultimi-n') {
+    finale = tutteEstrazioni.slice(-numConcorsi);
+  }
+
+  STATE.estrazioni = finale;
+  STATE.anniCaricati = [...new Set(finale.map(r => new Date(r.Data).getFullYear()))].sort();
+
+  // Costruisce HashSet per verifica unicità sestine
+  mostraLoading('Indicizzazione...');
+  STATE.hashSet = new Set();
+  for (const r of finale) {
+    const chiave = estraiNumeri(r).sort((a,b)=>a-b).join('-');
+    STATE.hashSet.add(chiave);
+  }
+
+  nascondiLoading();
+  aggiornaUI();
+  mostraToast(`✅ ${finale.length} estrazioni caricate`, 'ok');
+}
+
+function aggiornaUI() {
+  const n = STATE.estrazioni.length;
+  if (n === 0) return;
+
+  // Stato header
+  document.getElementById('status-dot').className = 'status-dot ok';
+  document.getElementById('status-text').textContent = `${n} estrazioni`;
+
+  // Stats home
+  document.getElementById('stat-concorsi').textContent = n;
+  document.getElementById('stat-anni').textContent = STATE.anniCaricati.length;
+  const primaData = formattaData(STATE.estrazioni[0].Data);
+  document.getElementById('stat-dal').textContent = primaData.slice(6);  // solo anno
+
+  document.getElementById('box-archivio-caricato').style.display = 'block';
+
+  // Ultima estrazione
+  renderUltimaEstrazione();
+
+  // Abilita sezioni
+  document.getElementById('no-archivio-genera').style.display = 'none';
+  document.getElementById('genera-controls').style.display = 'block';
+  document.getElementById('no-archivio-stats').style.display = 'none';
+  document.getElementById('stats-controls').style.display = 'block';
+  document.getElementById('no-archivio-arch').style.display = 'none';
+  document.getElementById('archivio-controls').style.display = 'block';
+
+  // Aggiorna selettore anno archivio
+  aggiornaSelAnnoArchivio();
+
+  // Render stats
+  renderStats();
+
+  // Render archivio
+  STATE.archPagina = 1;
+  renderArchivio();
+}
+
+function renderUltimaEstrazione() {
+  const ult = STATE.estrazioni[STATE.estrazioni.length - 1];
+  const nums = estraiNumeri(ult);
+  const html = `
+    <div class="estrazione-row">
+      <div class="estrazione-meta">
+        Concorso: <span>${ult.Concorso}</span> &nbsp;|&nbsp;
+        Data: <span>${formattaData(ult.Data)}</span>
+      </div>
+      ${renderPallini(nums, ult.Jolly, ult.SuperStar)}
+    </div>
+  `;
+  document.getElementById('ultima-estrazione').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+//  STATISTICHE
+// ═══════════════════════════════════════════════════════
+
+function calcolaStats(estrazioni) {
+  const freq = new Array(91).fill(0);
+  const ultVista = new Array(91).fill(null);  // ultimo concorso in cui è uscito
+  const totale = estrazioni.length;
+
+  estrazioni.forEach((r, idx) => {
+    estraiNumeri(r).forEach(n => {
+      freq[n]++;
+      ultVista[n] = idx;
+    });
+  });
+
+  // Ritardo = concorsi dall'ultima uscita
+  const ritardo = new Array(91).fill(0);
+  for (let n = 1; n <= 90; n++) {
+    ritardo[n] = ultVista[n] === null ? totale : (totale - 1 - ultVista[n]);
+  }
+
+  return { freq, ritardo, totale };
+}
+
+function getSubset() {
+  const n = parseInt(document.getElementById('inp-stats-n').value) || 0;
+  if (n > 0 && n < STATE.estrazioni.length) return STATE.estrazioni.slice(-n);
+  return STATE.estrazioni;
+}
+
+function renderStats() {
+  if (!STATE.estrazioni.length) return;
+  const subset = getSubset();
+  const { freq, ritardo, totale } = calcolaStats(subset);
+  const vista = STATE.vistaStat;
+
+  // Valori per coloring
+  let valori;
+  if (vista === 'frequenza') valori = freq;
+  else if (vista === 'ritardo') valori = ritardo;
+  else valori = freq.map(f => -f);  // freddi = inverso frequenza
+
+  // Normalizza in 5 classi
+  const vals = [];
+  for (let n = 1; n <= 90; n++) vals.push(valori[n]);
+  const sorted = [...vals].sort((a,b) => b-a);
+  const q1 = sorted[Math.floor(sorted.length * 0.2)];
+  const q2 = sorted[Math.floor(sorted.length * 0.4)];
+  const q3 = sorted[Math.floor(sorted.length * 0.6)];
+  const q4 = sorted[Math.floor(sorted.length * 0.8)];
+
+  function classe(v) {
+    if (v >= q1) return 5;
+    if (v >= q2) return 4;
+    if (v >= q3) return 3;
+    if (v >= q4) return 2;
+    return 1;
+  }
+
+  const prefix = (vista === 'ritardo') ? 'rit' : 'freq';
+
+  const griglia = document.getElementById('griglia-stats');
+  griglia.innerHTML = '';
+
+  for (let n = 1; n <= 90; n++) {
+    const v = valori[n];
+    const cl = classe(v);
+    const label = vista === 'ritardo' ? `${ritardo[n]}` : `${freq[n]}`;
+    const cell = document.createElement('div');
+    cell.className = `num-stat-cell ${prefix}-${cl}`;
+    cell.title = vista === 'ritardo'
+      ? `Numero ${n}: assente da ${ritardo[n]} concorsi`
+      : `Numero ${n}: uscito ${freq[n]} volte`;
+    cell.innerHTML = `<span class="n">${n}</span><span class="v">${label}</span>`;
+    griglia.appendChild(cell);
+  }
+
+  // Titoli e legenda
+  if (vista === 'frequenza') {
+    document.getElementById('stats-titolo').textContent = `📈 Frequenza Numeri (1–90) — ${totale} concorsi`;
+    document.getElementById('top10-titolo').textContent = '🏆 Top 10 più frequenti';
+    const top10 = [...Array(90).keys()].map(i=>i+1).sort((a,b)=>freq[b]-freq[a]).slice(0,10);
+    document.getElementById('top10-pallini').innerHTML = top10.map(n =>
+      `<div class="pallino blu" title="${freq[n]} volte">${n}</div>`
+    ).join('');
+    document.getElementById('legenda-stats').innerHTML = `
+      <div class="leg-item"><div class="leg-dot freq-5" style="background:#c8a200"></div> Molto caldo</div>
+      <div class="leg-item"><div class="leg-dot freq-3" style="background:#1a3a7a"></div> Medio</div>
+      <div class="leg-item"><div class="leg-dot freq-1" style="background:#0a1530"></div> Freddo</div>
+    `;
+  } else if (vista === 'ritardo') {
+    document.getElementById('stats-titolo').textContent = `⏳ Ritardatari (1–90) — ${totale} concorsi`;
+    document.getElementById('top10-titolo').textContent = '⏳ Top 10 più ritardatari';
+    const top10 = [...Array(90).keys()].map(i=>i+1).sort((a,b)=>ritardo[b]-ritardo[a]).slice(0,10);
+    const maxRit = Math.max(...top10.map(n=>ritardo[n]));
+    document.getElementById('top10-pallini').innerHTML = top10.map(n => {
+      const pct = Math.round((ritardo[n]/maxRit)*100);
+      return `
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+          <div class="pallino rit-${classe(ritardo[n])}" title="Assente da ${ritardo[n]} concorsi">${n}</div>
+          <div class="ritardo-bar" style="width:36px"><div class="ritardo-fill" style="width:${pct}%"></div></div>
+          <div style="font-size:0.55rem;color:var(--testo-dim)">${ritardo[n]}c</div>
+        </div>
+      `;
+    }).join('');
+    document.getElementById('legenda-stats').innerHTML = `
+      <div class="leg-item"><div class="leg-dot" style="background:#e03030;border-radius:50%"></div> Molto in ritardo</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#e09020;border-radius:50%"></div> Ritardo medio</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#0a1530;border-radius:50%"></div> Regolare</div>
+    `;
+  } else {
+    document.getElementById('stats-titolo').textContent = `❄️ Numeri Freddi (1–90) — ${totale} concorsi`;
+    document.getElementById('top10-titolo').textContent = '❄️ Top 10 più freddi';
+    const top10 = [...Array(90).keys()].map(i=>i+1).sort((a,b)=>freq[a]-freq[b]).slice(0,10);
+    document.getElementById('top10-pallini').innerHTML = top10.map(n =>
+      `<div class="pallino freddi" style="background:radial-gradient(circle at 35% 30%,#3a8ac8,#0a4878);color:#fff;border:2px solid #1a6898" title="${freq[n]} volte">${n}</div>`
+    ).join('');
+    document.getElementById('legenda-stats').innerHTML = `
+      <div class="leg-item"><div class="leg-dot freq-1" style="background:#0a1530"></div> Pochissimo estratto</div>
+      <div class="leg-item"><div class="leg-dot freq-3" style="background:#1a3a7a"></div> Estratto mediamente</div>
+    `;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  ARCHIVIO STORICO
+// ═══════════════════════════════════════════════════════
+
+function aggiornaSelAnnoArchivio() {
+  const sel = document.getElementById('arch-sel-anno');
+  sel.innerHTML = '<option value="">Tutti gli anni</option>';
+  STATE.anniCaricati.forEach(a => {
+    sel.innerHTML += `<option value="${a}">${a}</option>`;
+  });
+}
+
+function getEstrazioniFiltered() {
+  let dati = [...STATE.estrazioni].reverse(); // più recente prima
+  if (STATE.archFiltroAnno) {
+    dati = dati.filter(r => new Date(r.Data).getFullYear() === parseInt(STATE.archFiltroAnno));
+  }
+  if (STATE.archFiltroNum) {
+    const cerca = parseInt(STATE.archFiltroNum);
+    if (!isNaN(cerca)) {
+      dati = dati.filter(r => estraiNumeri(r).includes(cerca) || r.Jolly === cerca || r.SuperStar === cerca);
+    }
+  }
+  return dati;
+}
+
+function renderArchivio() {
+  if (!STATE.estrazioni.length) return;
+  const dati = getEstrazioniFiltered();
+  const totPagine = Math.ceil(dati.length / STATE.archPerPagina);
+  if (STATE.archPagina > totPagine) STATE.archPagina = 1;
+  const inizio = (STATE.archPagina - 1) * STATE.archPerPagina;
+  const slice = dati.slice(inizio, inizio + STATE.archPerPagina);
+
+  const tbody = document.getElementById('arch-tbody');
+  if (slice.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--testo-dim);padding:20px">Nessuna estrazione trovata</td></tr>`;
+  } else {
+    tbody.innerHTML = slice.map(r => {
+      const nums = estraiNumeri(r);
+      const cerca = STATE.archFiltroNum ? parseInt(STATE.archFiltroNum) : null;
+      const pallinisHtml = nums.map(n => {
+        const evidenzia = cerca && n === cerca ? ' style="box-shadow:0 0 0 2px #e8bc00"' : '';
+        return `<div class="pallino-mini blu"${evidenzia}>${n}</div>`;
+      }).join('');
+      const jollyEv = cerca && r.Jolly === cerca ? ' style="box-shadow:0 0 0 2px #e8bc00"' : '';
+      const ssEv = cerca && r.SuperStar === cerca ? ' style="box-shadow:0 0 0 2px #e8bc00"' : '';
+      return `
+        <tr>
+          <td style="color:var(--testo-dim);font-size:0.72rem">${r.Concorso}</td>
+          <td style="color:var(--testo-dim)">${formattaData(r.Data)}</td>
+          <td><div class="pallini-mini">${pallinisHtml}</div></td>
+          <td><div class="pallino-mini jolly"${jollyEv}>${r.Jolly}</div></td>
+          <td><div class="pallino-mini superstar"${ssEv}>${r.SuperStar}</div></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // Paginazione
+  renderPaginazione(totPagine, dati.length);
+}
+
+function renderPaginazione(totPagine, totRecord) {
+  const pag = document.getElementById('paginazione');
+  if (totPagine <= 1) { pag.innerHTML = ''; return; }
+
+  let html = `<button class="btn-pag" id="pag-prev" ${STATE.archPagina===1?'disabled':''}>‹ Prec</button>`;
+
+  // Max 5 pulsanti pagina
+  const start = Math.max(1, STATE.archPagina - 2);
+  const end   = Math.min(totPagine, start + 4);
+  for (let p = start; p <= end; p++) {
+    html += `<button class="btn-pag ${p===STATE.archPagina?'active':''}" data-pag="${p}">${p}</button>`;
+  }
+  html += `<button class="btn-pag" id="pag-next" ${STATE.archPagina===totPagine?'disabled':''}>Succ ›</button>`;
+  html += `<span style="font-size:0.7rem;color:var(--testo-dim)">${totRecord} record</span>`;
+  pag.innerHTML = html;
+
+  pag.querySelectorAll('[data-pag]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      STATE.archPagina = parseInt(btn.dataset.pag);
+      renderArchivio();
+    });
+  });
+  document.getElementById('pag-prev')?.addEventListener('click', () => {
+    if (STATE.archPagina > 1) { STATE.archPagina--; renderArchivio(); }
+  });
+  document.getElementById('pag-next')?.addEventListener('click', () => {
+    if (STATE.archPagina < totPagine) { STATE.archPagina++; renderArchivio(); }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  GENERAZIONE SESTINE
+// ═══════════════════════════════════════════════════════
+
+function sestinaMaiUscita(nums) {
+  if (!STATE.hashSet) return true;
+  const chiave = [...nums].sort((a,b)=>a-b).join('-');
+  return !STATE.hashSet.has(chiave);
+}
+
+function generaCasuale() {
+  let tentativi = 0;
+  while (tentativi < 1000) {
+    const nums = [];
+    while (nums.length < 6) {
+      const n = Math.floor(Math.random() * 90) + 1;
+      if (!nums.includes(n)) nums.push(n);
+    }
+    nums.sort((a,b)=>a-b);
+    if (sestinaMaiUscita(nums)) return nums;
+    tentativi++;
+  }
+  return null;
+}
+
+function generaDaPool(pool, n = 6) {
+  // Pesca casualmente dal pool dato
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  let tentativi = 0;
+  while (tentativi < 500) {
+    const nums = shuffled.slice(0, n);
+    if (nums.length === 6) {
+      const sorted = nums.sort((a,b)=>a-b);
+      if (sestinaMaiUscita(sorted)) return sorted;
+    }
+    shuffled.sort(() => Math.random() - 0.5);
+    tentativi++;
+  }
+  return null;
+}
+
+function generaFrequenti() {
+  const { freq } = calcolaStats(STATE.estrazioni);
+  // Top 20 più frequenti
+  const pool = [...Array(90).keys()].map(i=>i+1)
+    .sort((a,b)=>freq[b]-freq[a]).slice(0,20);
+  return generaDaPool(pool);
+}
+
+function generaFreddi() {
+  const { freq } = calcolaStats(STATE.estrazioni);
+  // Bottom 20 meno frequenti
+  const pool = [...Array(90).keys()].map(i=>i+1)
+    .sort((a,b)=>freq[a]-freq[b]).slice(0,20);
+  return generaDaPool(pool);
+}
+
+function generaRitardatari() {
+  const { ritardo } = calcolaStats(STATE.estrazioni);
+  // Top 20 più ritardatari
+  const pool = [...Array(90).keys()].map(i=>i+1)
+    .sort((a,b)=>ritardo[b]-ritardo[a]).slice(0,20);
+  return generaDaPool(pool);
+}
+
+function generaRidotta() {
+  // Algoritmo bilanciamento strutturato per massimizzare probabilità di 4+
+  const { freq } = calcolaStats(STATE.estrazioni);
+
+  // Pool: numeri con frequenza nella fascia media (25°-75° percentile)
+  const freqVals = [...Array(90).keys()].map(i=>freq[i+1]).sort((a,b)=>a-b);
+  const p25 = freqVals[Math.floor(freqVals.length*0.25)];
+  const p75 = freqVals[Math.floor(freqVals.length*0.75)];
+
+  const poolMedia = [];
+  for (let n = 1; n <= 90; n++) {
+    if (freq[n] >= p25 && freq[n] <= p75) poolMedia.push(n);
+  }
+
+  // Fasce: bassa 1-30, media 31-60, alta 61-90
+  const bassa  = poolMedia.filter(n => n <= 30);
+  const media  = poolMedia.filter(n => n > 30 && n <= 60);
+  const alta   = poolMedia.filter(n => n > 60);
+
+  let tentativi = 0;
+  while (tentativi < 1000) {
+    const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
+
+    // Distribuzione 2-2-2
+    const da_bassa = shuffle(bassa).slice(0,2);
+    const da_media = shuffle(media).slice(0,2);
+    const da_alta  = shuffle(alta).slice(0,2);
+
+    if (da_bassa.length < 2 || da_media.length < 2 || da_alta.length < 2) {
+      // Pool troppo piccolo, fallback casuale dal poolMedia
+      return generaDaPool(poolMedia);
+    }
+
+    let nums = [...da_bassa, ...da_media, ...da_alta];
+
+    // Verifica bilanciamento pari/dispari (accetta 2-4, 3-3, 4-2)
+    const pari = nums.filter(n=>n%2===0).length;
+    if (pari < 2 || pari > 4) { tentativi++; continue; }
+
+    // Evita 3+ consecutivi
+    const sorted = nums.sort((a,b)=>a-b);
+    let consec = 1, maxConsec = 1;
+    for (let i=1; i<sorted.length; i++) {
+      if (sorted[i] === sorted[i-1]+1) { consec++; maxConsec=Math.max(maxConsec,consec); }
+      else consec = 1;
+    }
+    if (maxConsec >= 3) { tentativi++; continue; }
+
+    if (sestinaMaiUscita(sorted)) return sorted;
+    tentativi++;
+  }
+  return generaCasuale(); // fallback
+}
+
+function generaSuperStar(escludi) {
+  let n;
+  do { n = Math.floor(Math.random() * 90) + 1; } while (escludi.includes(n));
+  return n;
+}
+
+function renderSestina(nums, tipo, conSS, idx) {
+  const ss = conSS ? generaSuperStar(nums) : null;
+  const badge = `<span class="badge-tipo ${tipo}">${tipoLabel(tipo)}</span>`;
+  const check = `<span class="sestina-check">✓ Mai uscita</span>`;
+
+  let html = `
+    <div class="sestina-card">
+      <div class="sestina-header">
+        <span>Sestina ${idx}</span>
+        <div style="display:flex;gap:8px;align-items:center">${badge}${check}</div>
+      </div>
+      <div class="pallini">
+  `;
+  nums.forEach(n => html += pallino(n, 'blu'));
+  if (ss !== null) {
+    html += `<span class="pallino-label">SS</span>` + pallino(ss, 'superstar');
+  }
+  html += `</div></div>`;
+  return html;
+}
+
+function tipoLabel(tipo) {
+  const labels = {
+    casuale: '🎲 Casuale', frequenti: '🔥 Frequenti',
+    freddi: '❄️ Freddi', ritardatari: '⏳ Ritardatari', ridotta: '🎯 Ridotta'
+  };
+  return labels[tipo] || tipo;
+}
+
+function eseguiGenerazione(tipo) {
+  if (!STATE.estrazioni.length) {
+    mostraToast('Carica prima l\'archivio', 'err');
+    switchTab('home');
+    return;
+  }
+
+  const conSS = document.getElementById('chk-superstar').checked;
+  const due   = document.getElementById('chk-due-sestine').checked;
+  const quante = due ? 2 : 1;
+
+  const sestine = [];
+  for (let i = 0; i < quante; i++) {
+    let nums;
+    if (tipo === 'casuale')      nums = generaCasuale();
+    else if (tipo === 'frequenti')   nums = generaFrequenti();
+    else if (tipo === 'freddi')      nums = generaFreddi();
+    else if (tipo === 'ritardatari') nums = generaRitardatari();
+    else if (tipo === 'ridotta')     nums = generaRidotta();
+
+    if (!nums) { mostraToast('Impossibile generare una sestina valida', 'err'); return; }
+    sestine.push(nums);
+  }
+
+  let html = '';
+  sestine.forEach((nums, i) => {
+    html += renderSestina(nums, tipo, conSS, i+1);
+  });
+
+  document.getElementById('risultati-container').innerHTML = html;
+  switchTab('genera');
+}
+
+// ═══════════════════════════════════════════════════════
+//  NAVIGAZIONE TAB
+// ═══════════════════════════════════════════════════════
+
+function switchTab(nome) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === nome));
+  document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === `tab-${nome}`));
+}
+
+// ═══════════════════════════════════════════════════════
+//  EVENT LISTENERS
+// ═══════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSelettoriAnni();
+
+  // Stato iniziale sezioni (nascoste se no archivio)
+  document.getElementById('no-archivio-genera').style.display = 'block';
+  document.getElementById('genera-controls').style.display = 'none';
+  document.getElementById('no-archivio-stats').style.display = 'block';
+  document.getElementById('stats-controls').style.display = 'none';
+  document.getElementById('no-archivio-arch').style.display = 'block';
+  document.getElementById('archivio-controls').style.display = 'none';
+  document.getElementById('box-archivio-caricato').style.display = 'none';
+
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  // Modalità filtro
+  document.getElementById('sel-modalita').addEventListener('change', e => {
+    const v = e.target.value;
+    document.getElementById('grp-anno-da').style.display   = v==='intervallo' ? 'flex' : 'none';
+    document.getElementById('grp-anno-a').style.display    = v==='intervallo' ? 'flex' : 'none';
+    document.getElementById('grp-num-concorsi').style.display = v==='ultimi-n' ? 'flex' : 'none';
+  });
+
+  // Carica archivio
+  document.getElementById('btn-carica').addEventListener('click', caricaArchivio);
+
+  // Bottoni generazione
+  document.getElementById('btn-casuale').addEventListener('click',      () => eseguiGenerazione('casuale'));
+  document.getElementById('btn-frequenti').addEventListener('click',    () => eseguiGenerazione('frequenti'));
+  document.getElementById('btn-freddi').addEventListener('click',       () => eseguiGenerazione('freddi'));
+  document.getElementById('btn-ritardatari').addEventListener('click',  () => eseguiGenerazione('ritardatari'));
+  document.getElementById('btn-ridotta').addEventListener('click',      () => eseguiGenerazione('ridotta'));
+
+  // Stats vista
+  document.querySelectorAll('.btn-stat-filter').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.btn-stat-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      STATE.vistaStat = btn.dataset.vista;
+      renderStats();
+    });
+  });
+
+  document.getElementById('btn-stats-aggiorna').addEventListener('click', renderStats);
+
+  // Archivio filtri
+  document.getElementById('arch-sel-anno').addEventListener('change', e => {
+    STATE.archFiltroAnno = e.target.value;
+    STATE.archPagina = 1;
+    renderArchivio();
+  });
+
+  document.getElementById('arch-cerca-num').addEventListener('input', e => {
+    STATE.archFiltroNum = e.target.value.trim();
+    STATE.archPagina = 1;
+    renderArchivio();
+  });
+
+  document.getElementById('btn-arch-reset').addEventListener('click', () => {
+    STATE.archFiltroAnno = '';
+    STATE.archFiltroNum = '';
+    document.getElementById('arch-sel-anno').value = '';
+    document.getElementById('arch-cerca-num').value = '';
+    STATE.archPagina = 1;
+    renderArchivio();
+  });
+
+  // PWA Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sup-ena/sw.js').catch(console.warn);
+  }
+});
+</script>
+</body>
+</html>
