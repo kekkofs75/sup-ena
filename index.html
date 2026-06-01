@@ -292,6 +292,17 @@
       align-items: center;
     }
 
+    /* Layout a due righe: riga numeri + riga J/SS */
+    .pallini-riga {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
+    .pallini-riga-jss {
+      margin-top: 6px;
+    }
+
     .pallino {
       width: 36px;
       height: 36px;
@@ -548,7 +559,47 @@
       font-size: 0.65rem;
       font-weight: 800;
     }
-    .badge-tipo.casuale   { background: rgba(232,130,26,0.15); color: #f0a060; border: 1px solid var(--arancio); }
+    .btn-gen.mix {
+      border-color: #9b59b6;
+    }
+    .btn-gen.mix:hover:not(:disabled) { color: #c990e8; border-color: #9b59b6; background: rgba(155,89,182,0.1); }
+
+    /* Pannello mix sliders */
+    .mix-slider-grid { display: flex; flex-direction: column; gap: 8px; }
+    .mix-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mix-lbl { font-size: 0.75rem; color: var(--testo-dim); width: 90px; flex-shrink: 0; }
+    .mix-range {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--blu-bordo);
+      outline: none;
+      cursor: pointer;
+    }
+    .mix-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #9b59b6;
+      cursor: pointer;
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    }
+    .mix-val {
+      width: 18px;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #c990e8;
+      flex-shrink: 0;
+    }
+    .badge-tipo.mix { background: rgba(155,89,182,0.15); color: #c990e8; border: 1px solid #9b59b6; }
     .badge-tipo.frequenti { background: rgba(224,80,80,0.15); color: #ff9090; border: 1px solid #e05050; }
     .badge-tipo.ritardatari { background: rgba(74,154,219,0.15); color: #7abfff; border: 1px solid #4a9adb; }
     .badge-tipo.freddi    { background: rgba(90,191,204,0.15); color: #8adde8; border: 1px solid #5abfcc; }
@@ -942,7 +993,7 @@
 
       <!-- Ultima estrazione -->
       <div class="card">
-        <div class="card-title">🎰 Ultima Estrazione</div>
+        <div class="card-title">🎰 Ultime 3 Estrazioni</div>
         <div id="ultima-estrazione">
           <div class="empty-state"><p>Carica l'archivio</p></div>
         </div>
@@ -968,7 +1019,41 @@
           <button class="btn-gen frequenti" id="btn-frequenti">🔥 Frequenti<br><small style="font-weight:400;font-size:0.72rem">Numeri caldi</small></button>
           <button class="btn-gen freddi" id="btn-freddi">❄️ Freddi<br><small style="font-weight:400;font-size:0.72rem">Poco estratti</small></button>
           <button class="btn-gen ritardatari" id="btn-ritardatari">⏳ Ritardatari<br><small style="font-weight:400;font-size:0.72rem">Assenti da più</small></button>
+          <button class="btn-gen mix" id="btn-mix">🔀 Mix<br><small style="font-weight:400;font-size:0.72rem">Composizione libera</small></button>
           <button class="btn-gen ridotta" id="btn-ridotta">🎯 Puntata Ridotta<br><small style="font-weight:400;font-size:0.72rem">Ottimizzata per 4+</small></button>
+        </div>
+
+        <!-- Pannello Mix — appare solo quando si clicca Mix -->
+        <div id="pannello-mix" style="display:none;margin-top:12px;background:var(--blu-notte);border:1px solid var(--blu-bordo);border-radius:var(--raggio-sm);padding:12px">
+          <div style="font-size:0.75rem;color:var(--verde-chiaro);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">
+            🔀 Configura Mix <span style="color:var(--testo-dim);font-weight:400;text-transform:none;letter-spacing:0">(totale deve essere 6)</span>
+            <span id="mix-totale-badge" style="float:right;padding:2px 8px;border-radius:12px;background:var(--verde);color:#fff;font-size:0.7rem">6 ✓</span>
+          </div>
+          <div class="mix-slider-grid">
+            <div class="mix-row">
+              <span class="mix-lbl">🔥 Frequenti</span>
+              <input type="range" class="mix-range" id="mix-frequenti" min="0" max="6" value="2" />
+              <span class="mix-val" id="mix-frequenti-val">2</span>
+            </div>
+            <div class="mix-row">
+              <span class="mix-lbl">❄️ Freddi</span>
+              <input type="range" class="mix-range" id="mix-freddi" min="0" max="6" value="2" />
+              <span class="mix-val" id="mix-freddi-val">2</span>
+            </div>
+            <div class="mix-row">
+              <span class="mix-lbl">⏳ Ritardatari</span>
+              <input type="range" class="mix-range" id="mix-ritardatari" min="0" max="6" value="1" />
+              <span class="mix-val" id="mix-ritardatari-val">1</span>
+            </div>
+            <div class="mix-row">
+              <span class="mix-lbl">🎲 Casuali</span>
+              <input type="range" class="mix-range" id="mix-casuali" min="0" max="6" value="1" />
+              <span class="mix-val" id="mix-casuali-val">1</span>
+            </div>
+          </div>
+          <button class="btn-gen mix" id="btn-mix-genera" style="width:100%;margin-top:10px;border-radius:30px;padding:12px">
+            🔀 Genera Mix
+          </button>
         </div>
 
         <div class="toggle-row">
@@ -983,6 +1068,14 @@
           <span class="toggle-label">Genera <strong>2 sestine</strong> (invece di 1)</span>
           <label class="toggle">
             <input type="checkbox" id="chk-due-sestine" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row" style="border-top:none;padding-top:0">
+          <span class="toggle-label">🎯 <strong>Filtro Somma</strong> <small style="color:var(--testo-dim);font-weight:400">(somma 120–270, consigliato)</small></span>
+          <label class="toggle">
+            <input type="checkbox" id="chk-filtro-somma" checked />
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -1147,12 +1240,14 @@ function pallinoMini(n, tipo = 'blu') {
 }
 
 function renderPallini(nums, jolly, superstar) {
-  let html = '<div class="pallini">';
+  // Riga 1: 6 numeri estratti
+  let html = '<div class="pallini-riga">';
   nums.forEach(n => html += pallino(n, 'blu'));
-  html += `<span class="pallino-label">J</span>`;
+  html += '</div>';
+  // Riga 2: Jolly + SuperStar (senza etichette testo)
+  html += '<div class="pallini-riga pallini-riga-jss">';
   html += pallino(jolly, 'jolly');
   if (superstar !== undefined) {
-    html += `<span class="pallino-label">SS</span>`;
     html += pallino(superstar, 'superstar');
   }
   html += '</div>';
@@ -1287,17 +1382,19 @@ function aggiornaUI() {
 }
 
 function renderUltimaEstrazione() {
-  const ult = STATE.estrazioni[STATE.estrazioni.length - 1];
-  const nums = estraiNumeri(ult);
-  const html = `
-    <div class="estrazione-row">
-      <div class="estrazione-meta">
-        Concorso: <span>${ult.Concorso}</span> &nbsp;|&nbsp;
-        Data: <span>${formattaData(ult.Data)}</span>
+  const ultime3 = STATE.estrazioni.slice(-3).reverse(); // più recente prima
+  const html = ultime3.map((r, i) => {
+    const nums = estraiNumeri(r);
+    return `
+      <div class="estrazione-row" style="${i > 0 ? 'border-top:1px solid var(--blu-bordo);margin-top:12px;padding-top:12px' : ''}">
+        <div class="estrazione-meta">
+          Concorso: <span>${r.Concorso}</span> &nbsp;|&nbsp;
+          Data: <span>${formattaData(r.Data)}</span>
+        </div>
+        ${renderPallini(nums, r.Jolly, r.SuperStar)}
       </div>
-      ${renderPallini(nums, ult.Jolly, ult.SuperStar)}
-    </div>
-  `;
+    `;
+  }).join('');
   document.getElementById('ultima-estrazione').innerHTML = html;
 }
 
@@ -1388,9 +1485,11 @@ function renderStats() {
       `<div class="pallino blu" title="${freq[n]} volte">${n}</div>`
     ).join('');
     document.getElementById('legenda-stats').innerHTML = `
-      <div class="leg-item"><div class="leg-dot freq-5" style="background:#c8a200"></div> Molto caldo</div>
-      <div class="leg-item"><div class="leg-dot freq-3" style="background:#1a3a7a"></div> Medio</div>
-      <div class="leg-item"><div class="leg-dot freq-1" style="background:#0a1530"></div> Freddo</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#ff4040;border-radius:50%"></div> Molto frequente</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#ff8030;border-radius:50%"></div> Frequente</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#3a8c3f;border-radius:50%"></div> Nella media</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#2a5060;border-radius:50%"></div> Poco frequente</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#1e3020;border-radius:50%"></div> Rarissimo</div>
     `;
   } else if (vista === 'ritardo') {
     document.getElementById('stats-titolo').textContent = `⏳ Ritardatari (1–90) — ${totale} concorsi`;
@@ -1408,9 +1507,11 @@ function renderStats() {
       `;
     }).join('');
     document.getElementById('legenda-stats').innerHTML = `
-      <div class="leg-item"><div class="leg-dot" style="background:#e03030;border-radius:50%"></div> Molto in ritardo</div>
-      <div class="leg-item"><div class="leg-dot" style="background:#e09020;border-radius:50%"></div> Ritardo medio</div>
-      <div class="leg-item"><div class="leg-dot" style="background:#0a1530;border-radius:50%"></div> Regolare</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#ff4040;border-radius:50%"></div> Ritardo massimo</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#ff7030;border-radius:50%"></div> Molto in ritardo</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#ffaa30;border-radius:50%"></div> In ritardo</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#3a7a8a;border-radius:50%"></div> Lieve ritardo</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#1e3020;border-radius:50%"></div> In linea</div>
     `;
   } else {
     document.getElementById('stats-titolo').textContent = `❄️ Numeri Freddi (1–90) — ${totale} concorsi`;
@@ -1420,8 +1521,11 @@ function renderStats() {
       `<div class="pallino freddi" style="background:radial-gradient(circle at 35% 30%,#3a8ac8,#0a4878);color:#fff;border:2px solid #1a6898" title="${freq[n]} volte">${n}</div>`
     ).join('');
     document.getElementById('legenda-stats').innerHTML = `
-      <div class="leg-item"><div class="leg-dot freq-1" style="background:#0a1530"></div> Pochissimo estratto</div>
-      <div class="leg-item"><div class="leg-dot freq-3" style="background:#1a3a7a"></div> Estratto mediamente</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#ff4040;border-radius:50%"></div> Ghiacciato (rarissimo)</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#ff8030;border-radius:50%"></div> Molto freddo</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#3a8c3f;border-radius:50%"></div> Nella media</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#2a5060;border-radius:50%"></div> Abbastanza caldo</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#1e3020;border-radius:50%"></div> Molto caldo</div>
     `;
   }
 }
@@ -1638,7 +1742,43 @@ function generaRidotta() {
   return generaCasuale(); // fallback
 }
 
-function generaSuperStar(escludi) {
+function generaMix(cfg) {
+  // Calcola i pool una volta sola
+  const { freq, ritardo } = calcolaStats(STATE.estrazioni);
+  const tutti = [...Array(90).keys()].map(i => i + 1);
+  const poolFreq = [...tutti].sort((a, b) => freq[b] - freq[a]).slice(0, 20);
+  const poolFred = [...tutti].sort((a, b) => freq[a] - freq[b]).slice(0, 20);
+  const poolRit  = [...tutti].sort((a, b) => ritardo[b] - ritardo[a]).slice(0, 20);
+
+  const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
+
+  let tentativi = 0;
+  while (tentativi < 500) {
+    const scelti = new Set();
+
+    const pesca = (pool, n) => {
+      const candidati = shuffle(pool).filter(x => !scelti.has(x));
+      candidati.slice(0, n).forEach(x => scelti.add(x));
+    };
+
+    pesca(poolFreq, cfg.frequenti);
+    pesca(poolFred, cfg.freddi);
+    pesca(poolRit,  cfg.ritardatari);
+
+    // Casuali: da tutto il range escludendo già scelti
+    const restanti = shuffle(tutti.filter(x => !scelti.has(x)));
+    restanti.slice(0, cfg.casuali).forEach(x => scelti.add(x));
+
+    if (scelti.size === 6) {
+      const nums = [...scelti].sort((a, b) => a - b);
+      if (sestinaMaiUscita(nums)) return nums;
+    }
+    tentativi++;
+  }
+  return generaCasuale();
+}
+
+
   let n;
   do { n = Math.floor(Math.random() * 90) + 1; } while (escludi.includes(n));
   return n;
@@ -1649,28 +1789,52 @@ function renderSestina(nums, tipo, conSS, idx) {
   const badge = `<span class="badge-tipo ${tipo}">${tipoLabel(tipo)}</span>`;
   const check = `<span class="sestina-check">✓ Mai uscita</span>`;
 
-  let html = `
+  // Riga 1: 6 numeri
+  let rigaNums = '<div class="pallini-riga">';
+  nums.forEach(n => rigaNums += pallino(n, 'blu'));
+  rigaNums += '</div>';
+
+  // Riga 2: solo SS se richiesto (senza etichetta)
+  let rigaSS = '';
+  if (ss !== null) {
+    rigaSS = '<div class="pallini-riga pallini-riga-jss">' + pallino(ss, 'superstar') + '</div>';
+  }
+
+  return `
     <div class="sestina-card">
       <div class="sestina-header">
         <span>Sestina ${idx}</span>
         <div style="display:flex;gap:8px;align-items:center">${badge}${check}</div>
       </div>
-      <div class="pallini">
+      ${rigaNums}${rigaSS}
+    </div>
   `;
-  nums.forEach(n => html += pallino(n, 'blu'));
-  if (ss !== null) {
-    html += `<span class="pallino-label">SS</span>` + pallino(ss, 'superstar');
-  }
-  html += `</div></div>`;
-  return html;
 }
 
 function tipoLabel(tipo) {
   const labels = {
     casuale: '🎲 Casuale', frequenti: '🔥 Frequenti',
-    freddi: '❄️ Freddi', ritardatari: '⏳ Ritardatari', ridotta: '🎯 Ridotta'
+    freddi: '❄️ Freddi', ritardatari: '⏳ Ritardatari',
+    ridotta: '🎯 Ridotta', mix: '🔀 Mix'
   };
   return labels[tipo] || tipo;
+}
+
+function applicaFiltroSomma(nums) {
+  // Storicamente la somma dei 6 numeri cade quasi sempre tra 120 e 270
+  const somma = nums.reduce((a, b) => a + b, 0);
+  return somma >= 120 && somma <= 270;
+}
+
+// Wrapper che applica il filtro somma a qualsiasi generatore
+function generaConFiltro(generatoreFn, usaFiltro, maxTentativi = 200) {
+  for (let i = 0; i < maxTentativi; i++) {
+    const nums = generatoreFn();
+    if (!nums) return null;
+    if (!usaFiltro || applicaFiltroSomma(nums)) return nums;
+  }
+  // Fallback: restituisce comunque qualcosa senza filtro somma
+  return generatoreFn();
 }
 
 function eseguiGenerazione(tipo) {
@@ -1680,18 +1844,36 @@ function eseguiGenerazione(tipo) {
     return;
   }
 
-  const conSS = document.getElementById('chk-superstar').checked;
-  const due   = document.getElementById('chk-due-sestine').checked;
-  const quante = due ? 2 : 1;
+  const conSS        = document.getElementById('chk-superstar').checked;
+  const due          = document.getElementById('chk-due-sestine').checked;
+  const usaFiltro    = document.getElementById('chk-filtro-somma').checked;
+  const quante       = due ? 2 : 1;
+
+  // Per il Mix leggi i valori dei cursori
+  let mixConfig = null;
+  if (tipo === 'mix') {
+    mixConfig = {
+      frequenti:   parseInt(document.getElementById('mix-frequenti').value)   || 0,
+      freddi:      parseInt(document.getElementById('mix-freddi').value)      || 0,
+      ritardatari: parseInt(document.getElementById('mix-ritardatari').value) || 0,
+      casuali:     parseInt(document.getElementById('mix-casuali').value)     || 0,
+    };
+    const totale = Object.values(mixConfig).reduce((a, b) => a + b, 0);
+    if (totale !== 6) {
+      mostraToast(`Il totale deve essere 6 (ora è ${totale})`, 'err');
+      return;
+    }
+  }
 
   const sestine = [];
   for (let i = 0; i < quante; i++) {
     let nums;
-    if (tipo === 'casuale')      nums = generaCasuale();
-    else if (tipo === 'frequenti')   nums = generaFrequenti();
-    else if (tipo === 'freddi')      nums = generaFreddi();
-    else if (tipo === 'ritardatari') nums = generaRitardatari();
-    else if (tipo === 'ridotta')     nums = generaRidotta();
+    if (tipo === 'casuale')        nums = generaConFiltro(generaCasuale,      usaFiltro);
+    else if (tipo === 'frequenti') nums = generaConFiltro(generaFrequenti,    usaFiltro);
+    else if (tipo === 'freddi')    nums = generaConFiltro(generaFreddi,       usaFiltro);
+    else if (tipo === 'ritardatari') nums = generaConFiltro(generaRitardatari, usaFiltro);
+    else if (tipo === 'ridotta')   nums = generaConFiltro(generaRidotta,      usaFiltro);
+    else if (tipo === 'mix')       nums = generaConFiltro(() => generaMix(mixConfig), usaFiltro);
 
     if (!nums) { mostraToast('Impossibile generare una sestina valida', 'err'); return; }
     sestine.push(nums);
@@ -1699,7 +1881,7 @@ function eseguiGenerazione(tipo) {
 
   let html = '';
   sestine.forEach((nums, i) => {
-    html += renderSestina(nums, tipo, conSS, i+1);
+    html += renderSestina(nums, tipo, conSS, i + 1);
   });
 
   document.getElementById('risultati-container').innerHTML = html;
@@ -1753,6 +1935,30 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-freddi').addEventListener('click',       () => eseguiGenerazione('freddi'));
   document.getElementById('btn-ritardatari').addEventListener('click',  () => eseguiGenerazione('ritardatari'));
   document.getElementById('btn-ridotta').addEventListener('click',      () => eseguiGenerazione('ridotta'));
+
+  // Mix: apri/chiudi pannello
+  document.getElementById('btn-mix').addEventListener('click', () => {
+    const p = document.getElementById('pannello-mix');
+    p.style.display = p.style.display === 'none' ? 'block' : 'none';
+  });
+  document.getElementById('btn-mix-genera').addEventListener('click', () => eseguiGenerazione('mix'));
+
+  // Sliders mix: aggiorna valori e badge totale
+  ['frequenti','freddi','ritardatari','casuali'].forEach(id => {
+    document.getElementById(`mix-${id}`).addEventListener('input', aggiornaContatoreMix);
+  });
+
+  function aggiornaContatoreMix() {
+    ['frequenti','freddi','ritardatari','casuali'].forEach(id => {
+      const v = document.getElementById(`mix-${id}`).value;
+      document.getElementById(`mix-${id}-val`).textContent = v;
+    });
+    const tot = ['frequenti','freddi','ritardatari','casuali']
+      .reduce((s, id) => s + parseInt(document.getElementById(`mix-${id}`).value), 0);
+    const badge = document.getElementById('mix-totale-badge');
+    badge.textContent = tot === 6 ? '6 ✓' : `${tot} ✗`;
+    badge.style.background = tot === 6 ? 'var(--verde)' : 'var(--rosso-ss)';
+  }
 
   // Stats vista
   document.querySelectorAll('.btn-stat-filter').forEach(btn => {
