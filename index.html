@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#c8a200" />
+  <meta name="theme-color" content="#2d7a32" />
   <meta name="description" content="SupEna – Gestione estrazioni SuperEnalotto" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -18,21 +18,32 @@
        VARIABILI E RESET
     ═══════════════════════════════════════ */
     :root {
-      --oro:        #c8a200;
-      --oro-chiaro: #e8bc00;
-      --oro-scuro:  #8b6f00;
-      --blu-notte:  #0a1628;
-      --blu-medio:  #102040;
-      --blu-card:   #142038;
-      --blu-bordo:  #1e3058;
-      --rosso-ss:   #e03030;
-      --rosso-scuro:#a01010;
-      --verde:      #2ecc71;
-      --testo:      #e8e0cc;
-      --testo-dim:  #8a8070;
-      --raggio:     12px;
-      --raggio-sm:  8px;
-      --ombra:      0 4px 24px rgba(0,0,0,0.5);
+      /* Palette SuperEnalotto — verde brand */
+      --verde:        #3a8c3f;
+      --verde-chiaro: #4caf52;
+      --verde-scuro:  #2d7a32;
+      --verde-hover:  #236128;
+      /* Arancione — CTA ufficiale */
+      --arancio:      #e8821a;
+      --arancio-hover:#c96c10;
+      /* Rosso — SuperStar e badge */
+      --rosso-ss:     #e03030;
+      --rosso-scuro:  #a01010;
+      /* Dark background — manteniamo dark theme */
+      --blu-notte:    #0d1f12;
+      --blu-medio:    #142818;
+      --blu-card:     #1a3020;
+      --blu-bordo:    #2a4830;
+      /* Testo */
+      --testo:        #e8f0e8;
+      --testo-dim:    #7a9a80;
+      /* Alias per retrocompatibilità con vecchie variabili --oro */
+      --oro:          #3a8c3f;
+      --oro-chiaro:   #4caf52;
+      --oro-scuro:    #2d7a32;
+      --raggio:       12px;
+      --raggio-sm:    8px;
+      --ombra:        0 4px 24px rgba(0,0,0,0.5);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -51,13 +62,13 @@
        HEADER
     ═══════════════════════════════════════ */
     header {
-      background: linear-gradient(135deg, #0a1628 0%, #102040 50%, #0a1628 100%);
-      border-bottom: 2px solid var(--oro-scuro);
+      background: linear-gradient(135deg, #1a4020 0%, #2d7a32 50%, #1a4020 100%);
+      border-bottom: 2px solid var(--verde-scuro);
       padding: 0;
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 2px 20px rgba(200,162,0,0.3);
+      box-shadow: 0 2px 20px rgba(45,122,50,0.4);
     }
 
     .header-inner {
@@ -71,15 +82,15 @@
       width: 44px;
       height: 44px;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #f0d040, #c8a200 55%, #8b6f00);
+      background: radial-gradient(circle at 35% 35%, #6ecf74, #3a8c3f 55%, #1e5c22);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 900;
       font-size: 15px;
-      color: #1a0a00;
-      border: 2px solid var(--oro-scuro);
-      box-shadow: 0 2px 12px rgba(200,162,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+      color: #fff;
+      border: 2px solid #1e5c22;
+      box-shadow: 0 2px 12px rgba(58,140,63,0.6), inset 0 1px 0 rgba(255,255,255,0.3);
       flex-shrink: 0;
       letter-spacing: -0.5px;
     }
@@ -88,7 +99,7 @@
       font-size: 1.6rem;
       font-weight: 800;
       letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #f0d040, #c8a200, #e8bc00);
+      background: linear-gradient(135deg, #a8e6ac, #6ecf74, #4caf52);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -111,8 +122,8 @@
       margin-right: 4px;
       vertical-align: middle;
     }
-    .status-dot.ok { background: var(--verde); box-shadow: 0 0 6px var(--verde); }
-    .status-dot.loading { background: var(--oro); animation: pulse 1s infinite; }
+    .status-dot.ok { background: #4caf52; box-shadow: 0 0 6px #4caf52; }
+    .status-dot.loading { background: var(--arancio); animation: pulse 1s infinite; }
 
     @keyframes pulse {
       0%,100% { opacity: 1; } 50% { opacity: 0.3; }
@@ -148,9 +159,9 @@
     }
     .tab-btn:hover { color: var(--testo); background: rgba(255,255,255,0.04); }
     .tab-btn.active {
-      color: var(--oro);
-      border-bottom-color: var(--oro);
-      background: rgba(200,162,0,0.08);
+      color: var(--verde-chiaro);
+      border-bottom-color: var(--verde-chiaro);
+      background: rgba(58,140,63,0.12);
     }
 
     /* ═══════════════════════════════════════
@@ -217,24 +228,24 @@
     }
     select:focus, input[type="number"]:focus {
       outline: none;
-      border-color: var(--oro);
+      border-color: var(--verde);
     }
 
     .btn-carica {
       width: 100%;
       margin-top: 12px;
       padding: 11px;
-      background: linear-gradient(135deg, var(--oro-scuro), var(--oro));
-      color: #1a0a00;
+      background: linear-gradient(135deg, var(--arancio-hover), var(--arancio));
+      color: #fff;
       border: none;
-      border-radius: var(--raggio-sm);
+      border-radius: 30px;
       font-weight: 800;
       font-size: 0.9rem;
       cursor: pointer;
       text-transform: uppercase;
       letter-spacing: 1px;
       transition: all 0.2s;
-      box-shadow: 0 2px 10px rgba(200,162,0,0.3);
+      box-shadow: 0 2px 10px rgba(232,130,26,0.4);
     }
     .btn-carica:hover { filter: brightness(1.1); transform: translateY(-1px); }
     .btn-carica:active { transform: translateY(0); }
@@ -260,7 +271,7 @@
     .stat-num {
       font-size: 1.4rem;
       font-weight: 900;
-      color: var(--oro);
+      color: var(--verde-chiaro);
       line-height: 1;
     }
     .stat-lbl {
@@ -296,20 +307,20 @@
     }
     .pallino:hover { transform: scale(1.1); }
 
-    /* Pallino standard blu (numeri estratti) */
+    /* Pallino numeri estratti — grigio chiaro come sito ufficiale */
     .pallino.blu {
-      background: radial-gradient(circle at 35% 30%, #2a5cb8, #0a2878);
-      color: #fff;
-      border: 2px solid #1a3a8a;
-      box-shadow: 0 2px 8px rgba(10,40,120,0.7), inset 0 1px 0 rgba(255,255,255,0.2);
+      background: radial-gradient(circle at 35% 30%, #d8d8d8, #b0b0b0);
+      color: #1a1a1a;
+      border: 2px solid #909090;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.6);
     }
 
-    /* Jolly - verde */
+    /* Jolly - verde brand SuperEnalotto */
     .pallino.jolly {
-      background: radial-gradient(circle at 35% 30%, #2ecc71, #1a8a48);
+      background: radial-gradient(circle at 35% 30%, #5cbf62, #2d7a32);
       color: #fff;
-      border: 2px solid #178a40;
-      box-shadow: 0 2px 8px rgba(30,140,60,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
+      border: 2px solid #236128;
+      box-shadow: 0 2px 8px rgba(45,122,50,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
     }
     .pallino.jolly::after {
       content: 'J';
@@ -318,7 +329,7 @@
       right: -1px;
       width: 13px;
       height: 13px;
-      background: #1a8a48;
+      background: #1e5c22;
       border-radius: 50%;
       font-size: 0.5rem;
       font-weight: 900;
@@ -330,12 +341,12 @@
       text-align: center;
     }
 
-    /* SuperStar - rosso/oro */
+    /* SuperStar - rosso come sito ufficiale */
     .pallino.superstar {
-      background: radial-gradient(circle at 35% 30%, #e8bc00, #c8a200, #8b6f00);
-      color: #1a0a00;
-      border: 2px solid #8b6f00;
-      box-shadow: 0 2px 8px rgba(200,162,0,0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+      background: radial-gradient(circle at 35% 30%, #f05050, #c02020);
+      color: #fff;
+      border: 2px solid #901010;
+      box-shadow: 0 2px 8px rgba(192,32,32,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
     }
     .pallino.superstar::after {
       content: '★';
@@ -344,7 +355,7 @@
       right: -3px;
       width: 15px;
       height: 15px;
-      background: var(--rosso-ss);
+      background: #a01010;
       border-radius: 50%;
       font-size: 0.55rem;
       display: flex;
@@ -409,43 +420,48 @@
     }
     .btn-gen:hover:not(:disabled) {
       background: var(--blu-medio);
-      border-color: var(--oro-scuro);
-      color: var(--oro);
+      border-color: var(--verde-scuro);
+      color: var(--verde-chiaro);
       transform: translateY(-1px);
     }
     .btn-gen:disabled { opacity: 0.35; cursor: not-allowed; }
 
     .btn-gen.primario {
-      background: linear-gradient(135deg, #0a2878, #1a3a8a);
-      border-color: #2a5cb8;
+      background: linear-gradient(135deg, var(--arancio-hover), var(--arancio));
+      border-color: var(--arancio);
+      color: #fff;
       grid-column: 1 / -1;
       padding: 14px;
       font-size: 0.9rem;
+      border-radius: 30px;
+      box-shadow: 0 2px 12px rgba(232,130,26,0.4);
     }
     .btn-gen.primario:hover:not(:disabled) {
-      background: linear-gradient(135deg, #1a3a8a, #2a5cb8);
+      background: linear-gradient(135deg, var(--arancio), #f09030);
       color: #fff;
     }
 
-    .btn-gen.frequenti { border-color: #2ecc71; }
-    .btn-gen.frequenti:hover:not(:disabled) { color: #2ecc71; border-color: #2ecc71; }
+    .btn-gen.frequenti { border-color: #e05050; }
+    .btn-gen.frequenti:hover:not(:disabled) { color: #ff8080; border-color: #e05050; background: rgba(224,80,80,0.1); }
 
-    .btn-gen.ritardatari { border-color: #e67e22; }
-    .btn-gen.ritardatari:hover:not(:disabled) { color: #e67e22; border-color: #e67e22; }
+    .btn-gen.ritardatari { border-color: #4a9adb; }
+    .btn-gen.ritardatari:hover:not(:disabled) { color: #7abfff; border-color: #4a9adb; background: rgba(74,154,219,0.1); }
 
-    .btn-gen.freddi { border-color: #3498db; }
-    .btn-gen.freddi:hover:not(:disabled) { color: #3498db; border-color: #3498db; }
+    .btn-gen.freddi { border-color: #5abfcc; }
+    .btn-gen.freddi:hover:not(:disabled) { color: #8adde8; border-color: #5abfcc; background: rgba(90,191,204,0.1); }
 
     .btn-gen.ridotta {
-      background: linear-gradient(135deg, #5a0a0a, #8b1a1a);
-      border-color: var(--rosso-ss);
-      color: #ffaaaa;
+      background: linear-gradient(135deg, var(--verde-hover), var(--verde-scuro));
+      border-color: var(--verde);
+      color: #a8e6ac;
       grid-column: 1 / -1;
       padding: 14px;
       font-size: 0.9rem;
+      border-radius: 30px;
+      box-shadow: 0 2px 12px rgba(45,122,50,0.4);
     }
     .btn-gen.ridotta:hover:not(:disabled) {
-      background: linear-gradient(135deg, #8b1a1a, #b02020);
+      background: linear-gradient(135deg, var(--verde-scuro), var(--verde));
       color: #fff;
     }
 
@@ -487,7 +503,7 @@
       border-radius: 50%;
       transition: 0.3s;
     }
-    .toggle input:checked + .toggle-slider { background: var(--rosso-ss); }
+    .toggle input:checked + .toggle-slider { background: var(--arancio); }
     .toggle input:checked + .toggle-slider::before {
       transform: translateX(20px);
       background: #fff;
@@ -532,15 +548,15 @@
       font-size: 0.65rem;
       font-weight: 800;
     }
-    .badge-tipo.casuale   { background: rgba(26,58,138,0.5); color: #7ab0ff; border: 1px solid #2a5cb8; }
-    .badge-tipo.frequenti { background: rgba(46,204,113,0.15); color: #2ecc71; border: 1px solid #2ecc71; }
-    .badge-tipo.ritardatari { background: rgba(230,126,34,0.15); color: #e67e22; border: 1px solid #e67e22; }
-    .badge-tipo.freddi    { background: rgba(52,152,219,0.15); color: #3498db; border: 1px solid #3498db; }
-    .badge-tipo.ridotta   { background: rgba(224,48,48,0.15); color: #ff8080; border: 1px solid var(--rosso-ss); }
+    .badge-tipo.casuale   { background: rgba(232,130,26,0.15); color: #f0a060; border: 1px solid var(--arancio); }
+    .badge-tipo.frequenti { background: rgba(224,80,80,0.15); color: #ff9090; border: 1px solid #e05050; }
+    .badge-tipo.ritardatari { background: rgba(74,154,219,0.15); color: #7abfff; border: 1px solid #4a9adb; }
+    .badge-tipo.freddi    { background: rgba(90,191,204,0.15); color: #8adde8; border: 1px solid #5abfcc; }
+    .badge-tipo.ridotta   { background: rgba(58,140,63,0.15); color: #8ad890; border: 1px solid var(--verde); }
 
     .sestina-check {
       font-size: 0.65rem;
-      color: var(--verde);
+      color: var(--verde-chiaro);
     }
 
     /* ═══════════════════════════════════════
@@ -566,8 +582,8 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    .btn-stat-filter:hover { border-color: var(--oro-scuro); color: var(--testo); }
-    .btn-stat-filter.active { background: var(--oro); color: #1a0a00; border-color: var(--oro); }
+    .btn-stat-filter:hover { border-color: var(--verde-scuro); color: var(--testo); }
+    .btn-stat-filter.active { background: var(--verde); color: #fff; border-color: var(--verde); }
 
     .num-concorsi-row {
       display: flex;
@@ -607,19 +623,19 @@
     .num-stat-cell .n { line-height: 1; }
     .num-stat-cell .v { font-size: 0.5rem; font-weight: 600; opacity: 0.8; }
 
-    /* Colori heat-map frequenza */
-    .freq-5 { background: radial-gradient(circle at 35% 35%, #f0d040, #c8a200, #8b6f00); color: #1a0a00; border-color: #8b6f00; }
-    .freq-4 { background: radial-gradient(circle at 35% 35%, #e8b020, #a87800); color: #fff; border-color: #a87800; }
-    .freq-3 { background: radial-gradient(circle at 35% 35%, #4a6a9a, #1a3a7a); color: #fff; border-color: #2a5a9a; }
-    .freq-2 { background: radial-gradient(circle at 35% 35%, #2a4a7a, #0a2060); color: #bbb; border-color: #1a3a6a; }
-    .freq-1 { background: radial-gradient(circle at 35% 35%, #1a2a4a, #0a1530); color: #888; border-color: #1a2a4a; }
+    /* Colori heat-map frequenza — rosso caldo → grigio freddo */
+    .freq-5 { background: radial-gradient(circle at 35% 35%, #ff6060, #c81010); color: #fff; border-color: #a00808; }
+    .freq-4 { background: radial-gradient(circle at 35% 35%, #ff9040, #d05010); color: #fff; border-color: #b03808; }
+    .freq-3 { background: radial-gradient(circle at 35% 35%, #3a8c3f, #236128); color: #fff; border-color: #1a4820; }
+    .freq-2 { background: radial-gradient(circle at 35% 35%, #2a5060, #1a3040); color: #aaa; border-color: #1a3040; }
+    .freq-1 { background: radial-gradient(circle at 35% 35%, #1e3020, #111a12); color: #666; border-color: #1e3020; }
 
-    /* Ritardi */
-    .rit-5 { background: radial-gradient(circle at 35% 35%, #e03030, #901010); color: #fff; border-color: #c02020; }
-    .rit-4 { background: radial-gradient(circle at 35% 35%, #e06020, #a03810); color: #fff; border-color: #c04810; }
-    .rit-3 { background: radial-gradient(circle at 35% 35%, #e09020, #a06010); color: #fff; border-color: #c07810; }
-    .rit-2 { background: radial-gradient(circle at 35% 35%, #4a4a8a, #2a2a6a); color: #fff; border-color: #3a3a7a; }
-    .rit-1 { background: radial-gradient(circle at 35% 35%, #1a2a4a, #0a1530); color: #888; border-color: #1a2a4a; }
+    /* Ritardi — dal rosso intenso (più in ritardo) al grigio (in linea) */
+    .rit-5 { background: radial-gradient(circle at 35% 35%, #ff4040, #901010); color: #fff; border-color: #c02020; }
+    .rit-4 { background: radial-gradient(circle at 35% 35%, #ff7030, #a03810); color: #fff; border-color: #c04810; }
+    .rit-3 { background: radial-gradient(circle at 35% 35%, #ffaa30, #a07010); color: #fff; border-color: #c08810; }
+    .rit-2 { background: radial-gradient(circle at 35% 35%, #3a7a8a, #1a4a5a); color: #fff; border-color: #2a5a6a; }
+    .rit-1 { background: radial-gradient(circle at 35% 35%, #1e3020, #111a12); color: #666; border-color: #1e3020; }
 
     /* Legenda */
     .legenda {
@@ -660,7 +676,7 @@
       flex: 1;
       min-width: 120px;
     }
-    .archivio-filtri input[type="text"]:focus { outline: none; border-color: var(--oro); }
+    .archivio-filtri input[type="text"]:focus { outline: none; border-color: var(--verde); }
 
     .btn-sm {
       padding: 8px 14px;
@@ -674,7 +690,7 @@
       transition: all 0.2s;
       white-space: nowrap;
     }
-    .btn-sm:hover { border-color: var(--oro-scuro); color: var(--oro); }
+    .btn-sm:hover { border-color: var(--verde-scuro); color: var(--verde-chiaro); }
 
     /* Tabella estrazioni */
     .tabella-wrapper {
@@ -691,7 +707,7 @@
 
     .estrazioni-table th {
       background: var(--blu-medio);
-      color: var(--oro);
+      color: var(--verde-chiaro);
       padding: 9px 10px;
       text-align: left;
       font-size: 0.68rem;
@@ -723,19 +739,19 @@
       font-size: 0.65rem;
     }
     .pallino-mini.blu {
-      background: radial-gradient(circle at 35% 30%, #2a5cb8, #0a2878);
-      color: #fff;
-      border: 1.5px solid #1a3a8a;
+      background: radial-gradient(circle at 35% 30%, #d8d8d8, #a8a8a8);
+      color: #1a1a1a;
+      border: 1.5px solid #888;
     }
     .pallino-mini.jolly {
-      background: radial-gradient(circle at 35% 30%, #2ecc71, #1a8a48);
+      background: radial-gradient(circle at 35% 30%, #5cbf62, #2d7a32);
       color: #fff;
-      border: 1.5px solid #178a40;
+      border: 1.5px solid #236128;
     }
     .pallino-mini.superstar {
-      background: radial-gradient(circle at 35% 30%, #e8bc00, #c8a200);
-      color: #1a0a00;
-      border: 1.5px solid #8b6f00;
+      background: radial-gradient(circle at 35% 30%, #f05050, #c02020);
+      color: #fff;
+      border: 1.5px solid #901010;
     }
 
     .paginazione {
@@ -757,8 +773,8 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .btn-pag:hover:not(:disabled) { border-color: var(--oro); color: var(--oro); }
-    .btn-pag.active { background: var(--oro); color: #1a0a00; border-color: var(--oro); font-weight: 800; }
+    .btn-pag:hover:not(:disabled) { border-color: var(--verde); color: var(--verde-chiaro); }
+    .btn-pag.active { background: var(--verde); color: #fff; border-color: var(--verde); font-weight: 800; }
     .btn-pag:disabled { opacity: 0.3; cursor: not-allowed; }
 
     /* ═══════════════════════════════════════
@@ -844,7 +860,7 @@
     .ritardo-fill {
       height: 100%;
       border-radius: 2px;
-      background: linear-gradient(90deg, #e67e22, #e03030);
+      background: linear-gradient(90deg, var(--arancio), var(--rosso-ss));
       transition: width 0.3s;
     }
   </style>

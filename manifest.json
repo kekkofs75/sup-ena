@@ -5,8 +5,8 @@
   "start_url": "/sup-ena/",
   "scope": "/sup-ena/",
   "display": "standalone",
-  "background_color": "#0a1628",
-  "theme_color": "#c8a200",
+  "background_color": "#0d1f12",
+  "theme_color": "#2d7a32",
   "orientation": "portrait-primary",
   "icons": [
     {
