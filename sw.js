@@ -1,4 +1,4 @@
-const CACHE_NAME = 'supena-v2';
+const CACHE_NAME = 'supena-v3';
 const STATIC_ASSETS = [
   '/sup-ena/',
   '/sup-ena/index.html',
