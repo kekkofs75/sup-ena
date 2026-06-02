@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#2d7a32" />
   <meta name="description" content="SupEna – Gestione estrazioni SuperEnalotto" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="SupEna" />
@@ -1778,7 +1779,7 @@ function generaMix(cfg) {
   return generaCasuale();
 }
 
-
+function generaSuperStar(escludi) {
   let n;
   do { n = Math.floor(Math.random() * 90) + 1; } while (escludi.includes(n));
   return n;
