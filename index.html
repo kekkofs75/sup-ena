@@ -1999,6 +1999,57 @@ document.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sup-ena/sw.js').catch(console.warn);
   }
+
+  // ═══════════════════════════════════════════════════════
+  //  SWIPE LATERALE PER NAVIGAZIONE TAB
+  // ═══════════════════════════════════════════════════════
+  const TAB_ORDER = ['home', 'genera', 'stats', 'archivio'];
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchStartTime = 0;
+
+  function tabCorrente() {
+    const attivo = document.querySelector('.tab-btn.active');
+    return attivo ? attivo.dataset.tab : 'home';
+  }
+
+  document.addEventListener('touchstart', e => {
+    // Ignora se tocco su slider (mix range) o select o input
+    if (e.target.closest('input, select, .tabella-wrapper, .mix-range')) return;
+    touchStartX    = e.touches[0].clientX;
+    touchStartY    = e.touches[0].clientY;
+    touchStartTime = Date.now();
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    if (!touchStartX) return;
+
+    const dx       = e.changedTouches[0].clientX - touchStartX;
+    const dy       = e.changedTouches[0].clientY - touchStartY;
+    const dt       = Date.now() - touchStartTime;
+    const absDx    = Math.abs(dx);
+    const absDy    = Math.abs(dy);
+
+    // Condizioni swipe valido:
+    // - spostamento orizzontale > 50px
+    // - più orizzontale che verticale (angolo < 35°)
+    // - completato in meno di 400ms
+    if (absDx < 50 || absDy > absDx * 0.7 || dt > 400) return;
+
+    const corrente = tabCorrente();
+    const idx      = TAB_ORDER.indexOf(corrente);
+
+    if (dx < 0 && idx < TAB_ORDER.length - 1) {
+      // Swipe sinistra → tab successivo
+      switchTab(TAB_ORDER[idx + 1]);
+    } else if (dx > 0 && idx > 0) {
+      // Swipe destra → tab precedente
+      switchTab(TAB_ORDER[idx - 1]);
+    }
+
+    touchStartX = 0;
+  }, { passive: true });
+
 });
 </script>
 </body>
