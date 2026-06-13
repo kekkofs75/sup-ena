@@ -1042,5 +1042,89 @@
     "Numero6": 71,
     "Jolly": 72,
     "SuperStar": 56
+  },
+  {
+    "Concorso": 88,
+    "Data": "2026-06-04T00:00:00",
+    "Numero1": 12,
+    "Numero2": 33,
+    "Numero3": 43,
+    "Numero4": 55,
+    "Numero5": 74,
+    "Numero6": 75,
+    "Jolly": 70,
+    "SuperStar": 59
+  },
+  {
+    "Concorso": 89,
+    "Data": "2026-06-05T00:00:00",
+    "Numero1": 9,
+    "Numero2": 25,
+    "Numero3": 51,
+    "Numero4": 63,
+    "Numero5": 73,
+    "Numero6": 89,
+    "Jolly": 90,
+    "SuperStar": 40
+  },
+  {
+    "Concorso": 90,
+    "Data": "2026-06-06T00:00:00",
+    "Numero1": 2,
+    "Numero2": 7,
+    "Numero3": 29,
+    "Numero4": 68,
+    "Numero5": 72,
+    "Numero6": 89,
+    "Jolly": 57,
+    "SuperStar": 38
+  },
+  {
+    "Concorso": 91,
+    "Data": "2026-06-08T00:00:00",
+    "Numero1": 28,
+    "Numero2": 33,
+    "Numero3": 51,
+    "Numero4": 59,
+    "Numero5": 82,
+    "Numero6": 87,
+    "Jolly": 88,
+    "SuperStar": 87
+  },
+  {
+    "Concorso": 92,
+    "Data": "2026-06-09T00:00:00",
+    "Numero1": 18,
+    "Numero2": 36,
+    "Numero3": 47,
+    "Numero4": 55,
+    "Numero5": 73,
+    "Numero6": 80,
+    "Jolly": 90,
+    "SuperStar": 54
+  },
+  {
+    "Concorso": 93,
+    "Data": "2026-06-11T00:00:00",
+    "Numero1": 7,
+    "Numero2": 21,
+    "Numero3": 22,
+    "Numero4": 40,
+    "Numero5": 44,
+    "Numero6": 87,
+    "Jolly": 53,
+    "SuperStar": 83
+  },
+  {
+    "Concorso": 94,
+    "Data": "2026-06-12T00:00:00",
+    "Numero1": 18,
+    "Numero2": 24,
+    "Numero3": 42,
+    "Numero4": 68,
+    "Numero5": 75,
+    "Numero6": 83,
+    "Jolly": 26,
+    "SuperStar": 20
   }
 ]
