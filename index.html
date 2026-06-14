@@ -560,9 +560,29 @@
       font-size: 0.65rem;
       font-weight: 800;
     }
-    .btn-gen.mix {
-      border-color: #9b59b6;
+    .btn-svuota-cache {
+      width: 100%;
+      margin-top: 8px;
+      padding: 9px;
+      background: transparent;
+      color: var(--testo-dim);
+      border: 1px dashed var(--blu-bordo);
+      border-radius: 30px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
     }
+    .btn-svuota-cache:hover {
+      border-color: var(--arancio);
+      color: var(--arancio);
+      background: rgba(232,130,26,0.07);
+    }
+
+    .btn-gen.bayesiano { border-color: #8e44ad; }
+    .btn-gen.bayesiano:hover:not(:disabled) { color: #c39bd3; border-color: #8e44ad; background: rgba(142,68,173,0.1); }
+    .badge-tipo.bayesiano { background: rgba(142,68,173,0.15); color: #c39bd3; border: 1px solid #8e44ad; }
     .btn-gen.mix:hover:not(:disabled) { color: #c990e8; border-color: #9b59b6; background: rgba(155,89,182,0.1); }
 
     /* Pannello mix sliders */
@@ -973,6 +993,7 @@
       </div>
 
       <button class="btn-carica" id="btn-carica">⬇️ Carica Archivio</button>
+      <button class="btn-svuota-cache" id="btn-svuota-cache" title="Forza il ricaricamento dei file dal server">🔄 Svuota Cache e Ricarica</button>
     </div>
 
     <!-- Stato archivio caricato -->
@@ -1021,6 +1042,7 @@
           <button class="btn-gen freddi" id="btn-freddi">❄️ Freddi<br><small style="font-weight:400;font-size:0.72rem">Poco estratti</small></button>
           <button class="btn-gen ritardatari" id="btn-ritardatari">⏳ Ritardatari<br><small style="font-weight:400;font-size:0.72rem">Assenti da più</small></button>
           <button class="btn-gen mix" id="btn-mix">🔀 Mix<br><small style="font-weight:400;font-size:0.72rem">Composizione libera</small></button>
+          <button class="btn-gen bayesiano" id="btn-bayesiano">📐 Probabilistico<br><small style="font-weight:400;font-size:0.72rem">Frequenza pesata recente</small></button>
           <button class="btn-gen ridotta" id="btn-ridotta">🎯 Puntata Ridotta<br><small style="font-weight:400;font-size:0.72rem">Ottimizzata per 4+</small></button>
         </div>
 
@@ -1077,6 +1099,22 @@
           <span class="toggle-label">🎯 <strong>Filtro Somma</strong> <small style="color:var(--testo-dim);font-weight:400">(somma 120–270, consigliato)</small></span>
           <label class="toggle">
             <input type="checkbox" id="chk-filtro-somma" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row" style="border-top:none;padding-top:0">
+          <span class="toggle-label">🚫 <strong>Escludi numeri recenti</strong>
+            <small style="color:var(--testo-dim);font-weight:400;display:block;margin-top:2px">
+              Ultimi <input type="number" id="inp-escludi-n" value="3" min="1" max="10"
+                style="width:38px;padding:2px 4px;font-size:0.8rem;display:inline-block;
+                       background:var(--blu-notte);border:1px solid var(--blu-bordo);
+                       border-radius:4px;color:var(--testo);text-align:center" />
+              concorsi (consigliato: 3)
+            </small>
+          </span>
+          <label class="toggle">
+            <input type="checkbox" id="chk-escludi-recenti" checked />
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -1743,6 +1781,37 @@ function generaRidotta() {
   return generaCasuale(); // fallback
 }
 
+// Restituisce il Set dei numeri usciti negli ultimi N concorsi
+function getNumeriRecenti(n) {
+  const recenti = new Set();
+  const slice = STATE.estrazioni.slice(-n);
+  slice.forEach(r => {
+    [r.Numero1,r.Numero2,r.Numero3,r.Numero4,r.Numero5,r.Numero6].forEach(x => recenti.add(x));
+  });
+  return recenti;
+}
+
+function generaBayesiano() {
+  // Frequenza pesata: ultimi 50 concorsi peso 3x, 51-200 peso 2x, resto peso 1x
+  const tot = STATE.estrazioni.length;
+  const pesi = new Array(91).fill(0);
+
+  STATE.estrazioni.forEach((r, idx) => {
+    const nums = [r.Numero1,r.Numero2,r.Numero3,r.Numero4,r.Numero5,r.Numero6];
+    const distanza = tot - 1 - idx; // 0 = più recente
+    const peso = distanza < 50 ? 3 : distanza < 200 ? 2 : 1;
+    nums.forEach(n => { pesi[n] += peso; });
+  });
+
+  // Costruisce pool pesato: ogni numero appare tante volte quante il suo peso normalizzato
+  // Prendiamo i top 25 per pesi
+  const ranking = [...Array(90).keys()].map(i => i + 1)
+    .sort((a, b) => pesi[b] - pesi[a]);
+  const pool = ranking.slice(0, 25);
+
+  return generaDaPool(pool);
+}
+
 function generaMix(cfg) {
   // Calcola i pool una volta sola
   const { freq, ritardo } = calcolaStats(STATE.estrazioni);
@@ -1816,7 +1885,7 @@ function tipoLabel(tipo) {
   const labels = {
     casuale: '🎲 Casuale', frequenti: '🔥 Frequenti',
     freddi: '❄️ Freddi', ritardatari: '⏳ Ritardatari',
-    ridotta: '🎯 Ridotta', mix: '🔀 Mix'
+    ridotta: '🎯 Ridotta', mix: '🔀 Mix', bayesiano: '📐 Probabilistico'
   };
   return labels[tipo] || tipo;
 }
@@ -1827,14 +1896,18 @@ function applicaFiltroSomma(nums) {
   return somma >= 120 && somma <= 270;
 }
 
-// Wrapper che applica il filtro somma a qualsiasi generatore
-function generaConFiltro(generatoreFn, usaFiltro, maxTentativi = 200) {
+// Wrapper che applica filtro somma e/o esclusione recenti
+function generaConFiltro(generatoreFn, usaFiltro, recenti = new Set(), maxTentativi = 300) {
   for (let i = 0; i < maxTentativi; i++) {
     const nums = generatoreFn();
     if (!nums) return null;
-    if (!usaFiltro || applicaFiltroSomma(nums)) return nums;
+    // Controlla esclusione recenti
+    if (recenti.size > 0 && nums.some(n => recenti.has(n))) continue;
+    // Controlla filtro somma
+    if (usaFiltro && !applicaFiltroSomma(nums)) continue;
+    return nums;
   }
-  // Fallback: restituisce comunque qualcosa senza filtro somma
+  // Fallback senza filtri se non trova nulla
   return generatoreFn();
 }
 
@@ -1845,10 +1918,18 @@ function eseguiGenerazione(tipo) {
     return;
   }
 
-  const conSS        = document.getElementById('chk-superstar').checked;
-  const due          = document.getElementById('chk-due-sestine').checked;
-  const usaFiltro    = document.getElementById('chk-filtro-somma').checked;
-  const quante       = due ? 2 : 1;
+  const conSS           = document.getElementById('chk-superstar').checked;
+  const due             = document.getElementById('chk-due-sestine').checked;
+  const usaFiltro       = document.getElementById('chk-filtro-somma').checked;
+  const escludiRecenti  = document.getElementById('chk-escludi-recenti').checked;
+  const nRecenti        = parseInt(document.getElementById('inp-escludi-n').value) || 3;
+  const quante          = due ? 2 : 1;
+
+  // Costruisce il set dei numeri da escludere se il flag è attivo
+  const recenti = escludiRecenti ? getNumeriRecenti(nRecenti) : new Set();
+
+  // Wrapper che filtra recenti + somma
+  const genera = (fn) => generaConFiltro(fn, usaFiltro, recenti, 300);
 
   // Per il Mix leggi i valori dei cursori
   let mixConfig = null;
@@ -1869,12 +1950,13 @@ function eseguiGenerazione(tipo) {
   const sestine = [];
   for (let i = 0; i < quante; i++) {
     let nums;
-    if (tipo === 'casuale')        nums = generaConFiltro(generaCasuale,      usaFiltro);
-    else if (tipo === 'frequenti') nums = generaConFiltro(generaFrequenti,    usaFiltro);
-    else if (tipo === 'freddi')    nums = generaConFiltro(generaFreddi,       usaFiltro);
-    else if (tipo === 'ritardatari') nums = generaConFiltro(generaRitardatari, usaFiltro);
-    else if (tipo === 'ridotta')   nums = generaConFiltro(generaRidotta,      usaFiltro);
-    else if (tipo === 'mix')       nums = generaConFiltro(() => generaMix(mixConfig), usaFiltro);
+    if (tipo === 'casuale')          nums = genera(generaCasuale);
+    else if (tipo === 'frequenti')   nums = genera(generaFrequenti);
+    else if (tipo === 'freddi')      nums = genera(generaFreddi);
+    else if (tipo === 'ritardatari') nums = genera(generaRitardatari);
+    else if (tipo === 'ridotta')     nums = genera(generaRidotta);
+    else if (tipo === 'bayesiano')   nums = genera(generaBayesiano);
+    else if (tipo === 'mix')         nums = genera(() => generaMix(mixConfig));
 
     if (!nums) { mostraToast('Impossibile generare una sestina valida', 'err'); return; }
     sestine.push(nums);
@@ -1930,12 +2012,34 @@ document.addEventListener('DOMContentLoaded', () => {
   // Carica archivio
   document.getElementById('btn-carica').addEventListener('click', caricaArchivio);
 
+  // Svuota cache e ricarica
+  document.getElementById('btn-svuota-cache').addEventListener('click', async () => {
+    mostraLoading('Svuoto la cache...');
+    try {
+      // Elimina tutte le cache del SW
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+      // Forza aggiornamento del SW se presente
+      if ('serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg) await reg.update();
+      }
+      nascondiLoading();
+      mostraToast('✅ Cache svuotata — ricarico...', 'ok');
+      setTimeout(() => window.location.reload(true), 1200);
+    } catch (e) {
+      nascondiLoading();
+      mostraToast('Errore svuotamento cache', 'err');
+    }
+  });
+
   // Bottoni generazione
   document.getElementById('btn-casuale').addEventListener('click',      () => eseguiGenerazione('casuale'));
   document.getElementById('btn-frequenti').addEventListener('click',    () => eseguiGenerazione('frequenti'));
   document.getElementById('btn-freddi').addEventListener('click',       () => eseguiGenerazione('freddi'));
   document.getElementById('btn-ritardatari').addEventListener('click',  () => eseguiGenerazione('ritardatari'));
   document.getElementById('btn-ridotta').addEventListener('click',      () => eseguiGenerazione('ridotta'));
+  document.getElementById('btn-bayesiano').addEventListener('click',    () => eseguiGenerazione('bayesiano'));
 
   // Mix: apri/chiudi pannello
   document.getElementById('btn-mix').addEventListener('click', () => {
